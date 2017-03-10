@@ -77,6 +77,19 @@ setSliderStep(handles);
 % Position detail window
 handles = reposition_detail_window(handles);
 
+% Dragging
+set(hObject, 'WindowButtonUpFcn', ...
+    @(hObject,eventdata)DaysimeterDataSelector('stopDragFcn',hObject,eventdata,guidata(hObject)));
+% Plot lines
+handles.h_b_line = line(handles.axes_detail,[handles.axes_detail.XLim(1) handles.axes_detail.XLim(1)], [0 1],...
+    'LineWidth', 1, 'Color', 'b', 'ButtonDownFcn', ...
+    @(hObject,eventdata)DaysimeterDataSelector('startDragB_Fcn',hObject,eventdata,guidata(hObject)));
+
+handles.h_r_line = line(handles.axes_detail,[handles.axes_detail.XLim(2) handles.axes_detail.XLim(2)], [0 1],...
+    'LineWidth', 1, 'Color', 'r', 'ButtonDownFcn', ...
+    @(hObject,eventdata)DaysimeterDataSelector('startDragR_Fcn',hObject,eventdata,guidata(hObject)));
+
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -498,3 +511,26 @@ function uitoggletool_zoomout_OffCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 h = zoom(handles.figure1);
 h.Enable = 'off';
+
+% Dragging functions
+function startDragB_Fcn(hObject, eventdata, handles)
+        set(handles.figure1, 'WindowButtonMotionFcn', @(hObject,eventdata)DaysimeterDataSelector('draggingB_Fcn',hObject,eventdata,guidata(hObject))); 
+    
+function draggingB_Fcn(hObject, eventdata, handles)
+        pt = get(handles.axes_detail, 'CurrentPoint');
+        set(handles.h_b_line, 'XData', pt(1)*[1 1]);    
+        
+        
+ 
+function startDragR_Fcn(hObject, eventdata, handles)
+        set(handles.figure1, 'WindowButtonMotionFcn', @(hObject,eventdata)DaysimeterDataSelector('draggingR_Fcn',hObject,eventdata,guidata(hObject)));
+
+function draggingR_Fcn(hObject, eventdata, handles)
+        pt = get(handles.axes_detail, 'CurrentPoint');
+        set(handles.h_r_line, 'XData', pt(1)*[1 1]);
+        
+        
+        
+function stopDragFcn(hObject, eventdata, handles)
+        set(handles.figure1, 'WindowButtonMotionFcn', '');
+ 
