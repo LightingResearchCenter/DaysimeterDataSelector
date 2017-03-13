@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 24-Feb-2017 14:43:42
+% Last Modified by GUIDE v2.5 13-Mar-2017 10:23:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -360,46 +360,6 @@ function checkbox_lux_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function uitoggletool_pan_OnCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_pan (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = pan(handles.figure1);
-h.ActionPostCallback = @(hObject,eventdata)DaysimeterDataSelector('reposition_overview_highlight',guidata(hObject));
-h.Enable = 'on';
-setAllowAxesPan(h,handles.axes_overview,false);
-setAxesPanConstraint(h,handles.axes_detail,'x');
-
-
-% --------------------------------------------------------------------
-function uitoggletool_pan_OffCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_pan (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = pan(handles.figure1);
-h.Enable = 'off';
-
-
-% --------------------------------------------------------------------
-function uitoggletool_zoomin_OnCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_zoomin (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = zoom(handles.figure1);
-h.ActionPostCallback = @(hObject,eventdata)DaysimeterDataSelector('reposition_overview_highlight',guidata(hObject));
-h.Direction = 'in';
-h.Enable = 'on';
-
-% --------------------------------------------------------------------
-function uitoggletool_zoomin_OffCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_zoomin (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = zoom(handles.figure1);
-h.Enable = 'off';
-
-
-% --------------------------------------------------------------------
 function d = findDaysimeterData(s)
 % s   struct containing possible Daysimeter data
 % d   Daysimeter data
@@ -486,23 +446,4 @@ function setSliderStep(handles)
 
 zoomLevel_days = days(getXZoom(handles));
 handles.slider_detailposition.SliderStep = [0.01*zoomLevel_days,0.1*zoomLevel_days];
-
-
-% --------------------------------------------------------------------
-function uitoggletool_zoomout_OnCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_zoomout (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = zoom(handles.figure1);
-h.ActionPostCallback = @(hObject,eventdata)DaysimeterDataSelector('reposition_overview_highlight',guidata(hObject));
-h.Direction = 'out';
-h.Enable = 'on';
-
-% --------------------------------------------------------------------
-function uitoggletool_zoomout_OffCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool_zoomout (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h = zoom(handles.figure1);
-h.Enable = 'off';
  
