@@ -57,9 +57,10 @@ handles.output = hObject;
 
 % Initialise tabs
 panels = [handles.fileeditor;handles.filebrowser];
-tabs   = panels2tabs(handles.figure1,panels);
+[handles.tabgp,tabs] = panels2tabs(handles.figure1,panels);
 handles.fileeditor  = tabs(1);
 handles.filebrowser = tabs(2);
+handles.tabgp.SelectedTab = handles.filebrowser;
 
 % Load data for testing
 addpath('C:\Users\jonesg5\Documents\GitHub\d12pack');

@@ -1,4 +1,4 @@
-function tabs = panels2tabs(parent,panels)
+function [tabgp,tabs] = panels2tabs(parent,panels)
 %PANELS2TABS Summary of this function goes here
 %   Detailed explanation goes here
 
