@@ -59,12 +59,14 @@ classdef DraggableLine
                     lw = 2;
                     c  = 'blue';
             end % end of switch nargin
+            axes(ax);
+            f = gcf;
             y = ax.YLim;
             obj.Handle = line(ax, x, y, 'LineWidth', lw, 'Color', c);
             obj.Handle.Tag = 'draggable';
             obj.Handle.ButtonDownFcn = @(src,eventdata)obj.startDrag(src,eventdata);
-            obj.Handle.Parent.Parent.WindowButtonUpFcn = @(src,eventdata)obj.stopDrag(src,eventdata);
-            obj.Handle.Parent.Parent.WindowButtonMotionFcn = @(src,eventdata)obj.mouseMove(src,eventdata);
+            f.WindowButtonUpFcn = @(src,eventdata)obj.stopDrag(src,eventdata);
+            f.WindowButtonMotionFcn = @(src,eventdata)obj.mouseMove(src,eventdata);
         end % end of DraggableLine method
         
         %--- Property Access Methods ---%
@@ -83,7 +85,9 @@ classdef DraggableLine
         %--- Dragging Methods ---%
         function obj = startDrag(obj,src,eventdata)
             set(gcf,'Pointer','left');
-            obj.Handle.Parent.Parent.WindowButtonMotionFcn = @(src,eventdata)obj.dragging(src,eventdata);
+            axes(obj.Handle.Parent);
+            f = gcf;
+            f.WindowButtonMotionFcn = @(src,eventdata)obj.dragging(src,eventdata);
         end % end of startDrag
         
         function obj = dragging(obj,src,eventdata)
@@ -93,7 +97,9 @@ classdef DraggableLine
         
         function obj = stopDrag(obj,src,eventdata)
             set(gcf,'Pointer','arrow');
-            obj.Handle.Parent.Parent.WindowButtonMotionFcn = @(src,eventdata)obj.mouseMove(src,eventdata);
+            axes(obj.Handle.Parent);
+            f = gcf;
+            f.WindowButtonMotionFcn = @(src,eventdata)obj.mouseMove(src,eventdata);
         end % end of stopDrag
         
         %--- Hover Methods ---%
