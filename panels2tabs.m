@@ -13,15 +13,11 @@ tabgp.Position = position;
 nTabs = numel(panels);
 tabs = gobjects(nTabs,1);
 for iTab = 1:nTabs
-    % Create tab, copy title from panel
     tabs(iTab) = uitab(tabgp,'Title',panels(iTab).Title);
-    % Copy tag from panel
     tabs(iTab).Tag = panels(iTab).Tag;
-    % Move children of panel to tab
-    children = get(panels(iTab),'Children');
-    set(children,'Parent', tabs(iTab));
-    % Delete original panel
-    delete(panels(iTab));
+    panels(iTab).Parent     = tabs(iTab);
+    panels(iTab).Title      = '';
+    panels(iTab).BorderType = 'none';
 end
 
 end

@@ -276,7 +276,6 @@ function pushbutton_start_pick_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_start_pick (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-brushObj = brush(handles.figure1);
 
 
 % --- Executes when selected object is changed in uibuttongroup_zoom.
