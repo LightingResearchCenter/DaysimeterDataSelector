@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 17-Mar-2017 15:02:59
+% Last Modified by GUIDE v2.5 20-Mar-2017 15:13:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,6 +58,15 @@ handles.output = hObject;
 % Load data for testing
 addpath('C:\Users\jonesg5\Documents\GitHub\d12pack');
 
+% Create SourceData and initialize to empty value;
+handles.SourceData = [];
+
+% Create ActiveDataIdx and initialize to zero
+handles.ActiveDataIdx = 0;
+
+% Enable only valid buttons and menus
+checkButtons(handles)
+checkMenus(handles)
 
 % % Plot draggable lines
 % x1 = handles.axes_detail.XLim(1) + 0.15*diff(handles.axes_detail.XLim);
@@ -123,7 +132,7 @@ function varargout = reposition_detail_window(handles)
 zoomLevel = getXZoom(handles);
 
 % Convert slider position to center point
-XCenter = datetime(handles.slider_detailposition.Value,'ConvertFrom','datenum','TimeZone',handles.Temp.Time.TimeZone);
+XCenter = datetime(handles.slider_detailposition.Value,'ConvertFrom','datenum','TimeZone',handles.DisplayData.Time.TimeZone);
 
 % Set detail window axis limits
 XLim1 = XCenter - zoomLevel/2;
@@ -233,8 +242,8 @@ end
 function setSliderLim(handles)
 % handles    structure with handles and user data (see GUIDATA)
 
-handles.slider_detailposition.Min = datenum(handles.Temp.Time(1));
-handles.slider_detailposition.Max = datenum(handles.Temp.Time(end));
+handles.slider_detailposition.Min = datenum(handles.DisplayData.Time(1));
+handles.slider_detailposition.Max = datenum(handles.DisplayData.Time(end));
 handles.slider_detailposition.Value = handles.slider_detailposition.Min;
 
 
@@ -277,11 +286,15 @@ function autosave_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function forwad_Callback(hObject, eventdata, handles)
-% hObject    handle to forwad (see GCBO)
+function forward_Callback(hObject, eventdata, handles)
+% hObject    handle to forward (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+if handles.ActiveDataIdx < numel(handles.SourceData)
+    TargetDataIdx = handles.ActiveDataIdx + 1;
+    changeDataSet(handles,TargetDataIdx);
+end
 
 % --------------------------------------------------------------------
 function back_Callback(hObject, eventdata, handles)
@@ -289,13 +302,23 @@ function back_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+if handles.ActiveDataIdx > 1
+    TargetDataIdx = handles.ActiveDataIdx - 1;
+    changeDataSet(handles,TargetDataIdx);
+end
 
 % --------------------------------------------------------------------
 function jump_Callback(hObject, eventdata, handles)
 % hObject    handle to jump (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+str = {handles.SourceData.ID};
+[TargetDataIdx,ok] = listdlg('PromptString','Jump to data set with ID:',...
+                         'SelectionMode','single',...
+                         'ListString',str);
+if ok
+    changeDataSet(handles,TargetDataIdx);
+end
 
 % --------------------------------------------------------------------
 function open_Callback(hObject, eventdata, handles)
@@ -305,28 +328,14 @@ function open_Callback(hObject, eventdata, handles)
 
 [FileName,PathName] = uigetfile('*.mat','Select the MATLAB data file');
 
+if FileName == 0
+    return
+end
+
 s = load(fullfile(PathName,FileName));
 handles.SourceData = findDaysimeterData(s);
-
-handles.Temp = struct; % Create a struct to store a temporary version of data
-handles.Temp.Time = handles.SourceData(2).Time;
-handles.Temp.ActivityIndex = handles.SourceData(2).ActivityIndex;
-
-% Plot data
-handles = plotData(handles);
-
-% Set title
-handles.text_id.String = sprintf('ID: %s',handles.SourceData(2).ID);
-
-% Adjust slider settings to data
-setSliderLim(handles);
-setSliderStep(handles);
-
-% Position detail window
-handles = reposition_detail_window(handles);
-
-% Update handles structure
-guidata(hObject, handles);
+handles.ActiveDataIdx = 0;
+changeDataSet(handles,1);
 
 % --------------------------------------------------------------------
 function import_Callback(hObject, eventdata, handles)
@@ -370,6 +379,10 @@ function pushbutton_back_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+if handles.ActiveDataIdx > 1
+    TargetDataIdx = handles.ActiveDataIdx - 1;
+    changeDataSet(handles,TargetDataIdx);
+end
 
 % --- Executes on button press in pushbutton_forward.
 function pushbutton_forward_Callback(hObject, eventdata, handles)
@@ -377,6 +390,10 @@ function pushbutton_forward_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+if handles.ActiveDataIdx < numel(handles.SourceData)
+    TargetDataIdx = handles.ActiveDataIdx + 1;
+    changeDataSet(handles,TargetDataIdx);
+end
 
 % --- Executes on button press in pushbutton_revertchanges.
 function pushbutton_revertchanges_Callback(hObject, eventdata, handles)
@@ -499,3 +516,71 @@ function pushbutton_pickstart_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_pickstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+%% Change data set
+function changeDataSet(handles,TargetDataIdx)
+
+if TargetDataIdx == handles.ActiveDataIdx
+    return
+end
+
+% Change the active data index to the target data index
+handles.ActiveDataIdx = TargetDataIdx;
+
+% Disable/Enable buttons
+checkButtons(handles)
+
+% Disable/Enable menus
+checkMenus(handles)
+
+% Plot data
+handles = plotData(handles);
+
+% Set title
+handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
+
+% Adjust slider settings to data
+setSliderLim(handles);
+setSliderStep(handles);
+
+% Position detail window
+handles = reposition_detail_window(handles);
+
+% Update handles structure
+guidata(handles.figure1, handles);
+
+
+function checkButtons(handles)
+
+if handles.ActiveDataIdx == 1 || handles.ActiveDataIdx == 0
+    handles.pushbutton_back.Enable = 'off';
+else
+    handles.pushbutton_back.Enable = 'on';
+end
+
+if handles.ActiveDataIdx == numel(handles.SourceData)
+    handles.pushbutton_forward.Enable = 'off';
+else
+    handles.pushbutton_forward.Enable = 'on';
+end
+
+function checkMenus(handles)
+
+if isempty(handles.SourceData)
+    handles.menu_data.Enable = 'off';
+else
+    handles.menu_data.Enable = 'on';
+    
+    if handles.ActiveDataIdx == 1 || handles.ActiveDataIdx == 0
+        handles.back.Enable = 'off';
+    else
+        handles.back.Enable = 'on';
+    end
+    
+    if handles.ActiveDataIdx == numel(handles.SourceData)
+        handles.forward.Enable = 'off';
+    else
+        handles.forward.Enable = 'on';
+    end
+end
