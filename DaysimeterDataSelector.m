@@ -168,6 +168,7 @@ function checkbox_ActivityIndex_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_ActivityIndex
 
+setDataVisibility(handles,'ActivityIndex',hObject.Value)
 
 % --- Executes on button press in checkbox_CircadianStimulus.
 function checkbox_CircadianStimulus_Callback(hObject, eventdata, handles)
@@ -177,6 +178,7 @@ function checkbox_CircadianStimulus_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_CircadianStimulus
 
+setDataVisibility(handles,'CircadianStimulus',hObject.Value)
 
 % --- Executes on button press in checkbox_CircadianLight.
 function checkbox_CircadianLight_Callback(hObject, eventdata, handles)
@@ -186,6 +188,7 @@ function checkbox_CircadianLight_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_CircadianLight
 
+setDataVisibility(handles,'CircadianLight',hObject.Value)
 
 % --- Executes on button press in checkbox_Illuminance.
 function checkbox_Illuminance_Callback(hObject, eventdata, handles)
@@ -195,6 +198,7 @@ function checkbox_Illuminance_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Illuminance
 
+setDataVisibility(handles,'Illuminance',hObject.Value)
 
 % --------------------------------------------------------------------
 function d = findDaysimeterData(s)
@@ -611,3 +615,18 @@ hObject.YScale = 'log';
 yyaxis(hObject,'left')
 hold(hObject,'on');
 area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[1, 1, 1],'EdgeColor','none','Tag','OverviewHighlight');
+
+function setDataVisibility(handles,varName,visState)
+
+if visState
+    visString = 'on';
+else
+    visString = 'off';
+end
+
+% Search for object with matching tag
+hObj = findobj(handles.figure1,'Tag',varName);
+
+for iObj = 1:numel(hObj)
+    hObj(iObj).Visible = visString;
+end
