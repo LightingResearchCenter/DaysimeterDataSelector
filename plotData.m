@@ -3,50 +3,157 @@ function handles = plotData(handles)
 %   Detailed explanation goes here
 % handles    structure with handles and user data (see GUIDATA)
 
-[jObj,handles] = startBusy(handles,'loading...');
+% [jObj,handles] = startBusy(handles,'loading...');
 
 % Retrieve index of data to plot
 idx = handles.ActiveDataIdx;
 
-% Convert data to simple form
+% Check if DisplayData exists
 if ~isfield(handles, 'DisplayData') % DisplayData does not exist so make it
     handles.DisplayData = struct;
 end
-handles.DisplayData.Time              = handles.SourceData(idx).Time;
-handles.DisplayData.ActivityIndex     = handles.SourceData(idx).ActivityIndex;
-handles.DisplayData.CircadianStimulus = handles.SourceData(idx).CircadianStimulus;
-handles.DisplayData.CircadianLight    = handles.SourceData(idx).CircadianLight;
-handles.DisplayData.Illuminance       = handles.SourceData(idx).Illuminance;
+% Copy Time over to DisplayData
+handles.DisplayData.Time = handles.SourceData(idx).Time;
 
-% Overview plots
-% Activity Index
-if isfield(handles, 'ActivityIndex_Overview') % Check if plot handle exists
-    if isvalid(handles.ActivityIndex_Overview) % Check if plot handle is still valid
-        set(handles.ActivityIndex_Overview, 'XData', handles.DisplayData.Time, 'YData', handles.DisplayData.ActivityIndex);
-    else
-        hold(handles.axes_overview,'on');
-        handles.ActivityIndex_Overview = plot(handles.axes_overview,handles.DisplayData.Time,handles.DisplayData.ActivityIndex,'-');
-    end
-else
-    hold(handles.axes_overview,'on');
-    handles.ActivityIndex_Overview = plot(handles.axes_overview,handles.DisplayData.Time,handles.DisplayData.ActivityIndex,'-');
-end
-if handles.checkbox_ai.Value
-    handles.ActivityIndex_Overview.Visible = 'on';
-else
-    handles.ActivityIndex_Overview.Visible = 'off';
+varNames = {'ActivityIndex','CircadianStimulus','CircadianLight','Illuminance'};
+
+for iVar = 1:numel(varNames)
+    % Conver data to simple form
+    handles.DisplayData.(varNames{iVar}) = handles.SourceData(idx).(varNames{iVar});
+    % Plot data
+    handles = overviewPlot(handles,varNames{iVar});
+    handles = detailPlot(handles,varNames{iVar});
 end
 
-yMax = max([1;handles.DisplayData.ActivityIndex]);
+% Format axes
+yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
+yMaxRight = max([1;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
 
-
+% Overview
+yyaxis(handles.axes_overview,'left')
 handles.axes_overview.XLimMode = 'manual';
 handles.axes_overview.XLim = [handles.DisplayData.Time(1),handles.DisplayData.Time(end)];
-handles.axes_overview.YLim = [0,yMax];
-hold(handles.axes_detail,'on');
-plot(handles.axes_detail,handles.DisplayData.Time,handles.DisplayData.ActivityIndex,'-o');
-handles.axes_detail.YLim = [0,yMax];
+handles.axes_overview.YLimMode = 'manual';
+handles.axes_overview.YLim = [0,yMaxLeft];
 
-stopBusy(handles,jObj,'done');
+yyaxis(handles.axes_overview,'right')
+handles.axes_overview.XLimMode = 'manual';
+handles.axes_overview.XLim = [handles.DisplayData.Time(1),handles.DisplayData.Time(end)];
+handles.axes_overview.YLimMode = 'manual';
+handles.axes_overview.YLim = [0.1,yMaxRight];
+
+% Detail
+yyaxis(handles.axes_detail,'left')
+handles.axes_detail.YLimMode = 'manual';
+handles.axes_detail.YLim = [0,yMaxLeft];
+
+yyaxis(handles.axes_detail,'right')
+handles.axes_detail.YLimMode = 'manual';
+handles.axes_detail.YLim = [0.1,yMaxRight];
+
+% stopBusy(handles,jObj,'done');
+
+end
+
+
+function handles = overviewPlot(handles,varName)
+varNameOV = [varName,'_Overview'];
+varNameCh = ['checkbox_',varName];
+
+[axSide,color,displayName] = getVarProp(varName);
+ax = handles.axes_overview;
+yyaxis(ax,axSide);
+
+% Search for object with matching tag
+hObj = findobj(ax,'Tag',varName);
+
+if isempty(hObj) % If object does not exist make it
+    hold(ax,'on');
+    hObj = plot(ax,...
+        handles.DisplayData.Time,...
+        handles.DisplayData.(varName),...
+        '-',...
+        'Color',       color,...
+        'Visible',     'off',...
+        'Tag',         varName,...
+        'DisplayName', displayName);
+    hold(ax,'off');
+else % else modify it
+    set(hObj, ...
+        'XData', handles.DisplayData.Time, ...
+        'YData', handles.DisplayData.(varName));
+end
+
+if handles.(varNameCh).Value
+    hObj.Visible = 'on';
+else
+    hObj.Visible = 'off';
+end
+
+handles.(varNameOV) = hObj;
+
+end
+
+
+function handles = detailPlot(handles,varName)
+varNameDV = [varName,'_Detail'];
+varNameCh = ['checkbox_',varName];
+
+[axSide,color,displayName] = getVarProp(varName);
+ax = handles.axes_detail;
+yyaxis(ax,axSide);
+
+% Search for object with matching tag
+hObj = findobj(ax,'Tag',varName);
+
+if isempty(hObj) % If object does not exist make it
+    hold(ax,'on');
+    hObj = plot(ax,...
+        handles.DisplayData.Time,...
+        handles.DisplayData.(varName),...
+        '-o',...
+        'Color',       color,...
+        'Visible',     'off',...
+        'Tag',         varName,...
+        'DisplayName', displayName);
+    hold(ax,'off');
+else % else modify it
+    set(hObj, ...
+        'XData', handles.DisplayData.Time, ...
+        'YData', handles.DisplayData.(varName));
+end
+
+if handles.(varNameCh).Value
+    hObj.Visible = 'on';
+else
+    hObj.Visible = 'off';
+end
+
+handles.(varNameDV) = hObj;
+
+end
+
+
+function [axSide,color,displayName] = getVarProp(varName)
+switch varName
+    case 'ActivityIndex'
+        axSide = 'left';
+        color = 'red';
+        displayName = 'Activity Index (AI)';
+    case 'CircadianStimulus'
+        axSide = 'left';
+        color = 'blue';
+        displayName = 'Circadian Stimulus (CS)';
+    case 'CircadianLight'
+        axSide = 'right';
+        color = 'green';
+        displayName = 'Circadian Light (CLA)';
+    case 'Illuminance'
+        axSide = 'right';
+        color = 'black';
+        displayName = 'Illuminance (lux)';
+    otherwise
+        error('Unrecognized varName');
+end
 
 end

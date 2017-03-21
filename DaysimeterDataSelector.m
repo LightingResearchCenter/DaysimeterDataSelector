@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 20-Mar-2017 15:13:12
+% Last Modified by GUIDE v2.5 21-Mar-2017 14:42:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -148,56 +148,52 @@ end
 
 % --- Reposition overview highlight
 function varargout = reposition_overview_highlight(handles)
-
+yyaxis(handles.axes_detail,'left');
 xHighlight = [handles.axes_detail.XLim(1),handles.axes_detail.XLim(1),handles.axes_detail.XLim(2),handles.axes_detail.XLim(2)];
 yHighlight = [    0,    1,    1,    0];
-if ~isfield(handles, 'OverviewHighlight')
-    hold(handles.axes_overview,'on');
-    handles.OverviewHighlight = area(xHighlight,yHighlight,'FaceColor',[1, 1, 1],'EdgeColor','none');
-else
-    set(handles.OverviewHighlight,'XData',xHighlight,'YData',yHighlight);
-end
-uistack(handles.OverviewHighlight,'bottom');
+
+handles.OverviewHighlight = findobj(handles.axes_overview,'Tag','OverviewHighlight');
+set(handles.OverviewHighlight,'XData',xHighlight,'YData',yHighlight);
 
 if nargout == 1
     varargout = {handles};
 end
 
 
-% --- Executes on button press in checkbox_ai.
-function checkbox_ai_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_ai (see GCBO)
+% --- Executes on button press in checkbox_ActivityIndex.
+function checkbox_ActivityIndex_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_ActivityIndex (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_ai
+% Hint: get(hObject,'Value') returns toggle state of checkbox_ActivityIndex
 
 
-% --- Executes on button press in checkbox_cs.
-function checkbox_cs_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_cs (see GCBO)
+% --- Executes on button press in checkbox_CircadianStimulus.
+function checkbox_CircadianStimulus_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_CircadianStimulus (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_cs
+% Hint: get(hObject,'Value') returns toggle state of checkbox_CircadianStimulus
 
 
-% --- Executes on button press in checkbox_cla.
-function checkbox_cla_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_cla (see GCBO)
+% --- Executes on button press in checkbox_CircadianLight.
+function checkbox_CircadianLight_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_CircadianLight (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_cla
+% Hint: get(hObject,'Value') returns toggle state of checkbox_CircadianLight
 
 
-% --- Executes on button press in checkbox_lux.
-function checkbox_lux_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_lux (see GCBO)
+% --- Executes on button press in checkbox_Illuminance.
+function checkbox_Illuminance_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Illuminance (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_lux
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Illuminance
 
 
 % --------------------------------------------------------------------
@@ -293,7 +289,7 @@ function forward_Callback(hObject, eventdata, handles)
 
 if handles.ActiveDataIdx < numel(handles.SourceData)
     TargetDataIdx = handles.ActiveDataIdx + 1;
-    changeDataSet(handles,TargetDataIdx);
+    changeDataSet(hObject,handles,TargetDataIdx);
 end
 
 % --------------------------------------------------------------------
@@ -304,7 +300,7 @@ function back_Callback(hObject, eventdata, handles)
 
 if handles.ActiveDataIdx > 1
     TargetDataIdx = handles.ActiveDataIdx - 1;
-    changeDataSet(handles,TargetDataIdx);
+    changeDataSet(hObject,handles,TargetDataIdx);
 end
 
 % --------------------------------------------------------------------
@@ -317,7 +313,7 @@ str = {handles.SourceData.ID};
                          'SelectionMode','single',...
                          'ListString',str);
 if ok
-    changeDataSet(handles,TargetDataIdx);
+    changeDataSet(hObject,handles,TargetDataIdx);
 end
 
 % --------------------------------------------------------------------
@@ -335,7 +331,7 @@ end
 s = load(fullfile(PathName,FileName));
 handles.SourceData = findDaysimeterData(s);
 handles.ActiveDataIdx = 0;
-changeDataSet(handles,1);
+changeDataSet(hObject,handles,1);
 
 % --------------------------------------------------------------------
 function import_Callback(hObject, eventdata, handles)
@@ -381,7 +377,7 @@ function pushbutton_back_Callback(hObject, eventdata, handles)
 
 if handles.ActiveDataIdx > 1
     TargetDataIdx = handles.ActiveDataIdx - 1;
-    changeDataSet(handles,TargetDataIdx);
+    changeDataSet(hObject,handles,TargetDataIdx);
 end
 
 % --- Executes on button press in pushbutton_forward.
@@ -392,7 +388,7 @@ function pushbutton_forward_Callback(hObject, eventdata, handles)
 
 if handles.ActiveDataIdx < numel(handles.SourceData)
     TargetDataIdx = handles.ActiveDataIdx + 1;
-    changeDataSet(handles,TargetDataIdx);
+    changeDataSet(hObject,handles,TargetDataIdx);
 end
 
 % --- Executes on button press in pushbutton_revertchanges.
@@ -519,7 +515,7 @@ function pushbutton_pickstart_Callback(hObject, eventdata, handles)
 
 
 %% Change data set
-function changeDataSet(handles,TargetDataIdx)
+function changeDataSet(hObject,handles,TargetDataIdx)
 
 if TargetDataIdx == handles.ActiveDataIdx
     return
@@ -548,7 +544,7 @@ setSliderStep(handles);
 handles = reposition_detail_window(handles);
 
 % Update handles structure
-guidata(handles.figure1, handles);
+guidata(hObject, handles);
 
 
 function checkButtons(handles)
@@ -584,3 +580,34 @@ else
         handles.forward.Enable = 'on';
     end
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function axes_detail_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_detail (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_detail
+
+% Make dual axis
+yyaxis(hObject,'right')
+hObject.YScale = 'log';
+
+
+% --- Executes during object creation, after setting all properties.
+function axes_overview_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_overview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_overview
+
+% Make dual axis
+yyaxis(hObject,'right')
+hObject.YScale = 'log';
+
+% Create highlight
+yyaxis(hObject,'left')
+hold(hObject,'on');
+area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[1, 1, 1],'EdgeColor','none','Tag','OverviewHighlight');
