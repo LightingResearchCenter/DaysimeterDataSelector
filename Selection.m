@@ -4,8 +4,8 @@ classdef Selection
     
     %% Properties public
     properties % (Access = public)
-        Lim  datetime = datetime.empty(0,2)
-        Type SelectionType
+        Lim  datetime = NaT(1,2,'TimeZone','local')
+        Type SelectionType = SelectionType.Null
     end
     
     %% Methods public
@@ -46,12 +46,12 @@ classdef Selection
                     obj.Lim = sort(p.Results.Lim);
                     
                     if ischar(p.Results.Type)
-                        expectedTypes = {'Bed','Error','Noncompliance','Observation'};
+                        expectedTypes = {'Bed','Error','Noncompliance','Observation','Work'};
                         TypeChar = validatestring(p.Results.Type,expectedTypes);
                         obj.Type  = SelectionType(TypeChar);
                     else % isa(p.Results.Type,'SelectionType')
                         obj.Type  = p.Results.Type;
-                    end % end of ischarp.Results.Type)
+                    end % end of ischar(p.Results.Type)
                 end % end of if islogical(varargin{1})
             end % end of if nargin > 0
         end % end of class constructor method
@@ -71,11 +71,32 @@ classdef Selection
             Type = vertcat(obj.Type);
             T = table(Lim,Type);
         end % end of table method
+        
+        function str = string(obj)
+            lim    = vertcat(obj.Lim);
+            type   = vertcat(obj.Type);
+            idxStr = string(num2str((1:numel(obj))'));
+            
+            % remove NaT
+            idxNaT = isnat(lim);
+            idxNaT = idxNaT(:,1) | idxNaT(:,2);
+            lim(idxNaT,:) = [];
+            type(idxNaT) = [];
+            idxStr(idxNaT) = [];
+            
+            lim1Str = string(datestr(lim(:,1),'mm/dd/yy HH:MM'));
+            lim2Str = string(datestr(lim(:,2),'mm/dd/yy HH:MM'));
+            typeStr = string(type);
+            
+            str = idxStr + "   " + lim1Str + " - " + lim2Str + "   " + typeStr;
+        end
     end % end of public methods
     
     %% Methods static
     methods (Static)
         function obj = Index2Selection(idx,datetimeArray,Type)
+            obj = Selection.empty;
+            
             % Class constructor from logical array and datetime array
             startIdx = diff([false;idx]) == 1;
             stopIdx  = diff([idx;false]) == -1;
