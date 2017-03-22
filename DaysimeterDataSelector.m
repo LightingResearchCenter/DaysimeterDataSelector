@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 21-Mar-2017 14:42:09
+% Last Modified by GUIDE v2.5 22-Mar-2017 17:58:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,8 +58,11 @@ handles.output = hObject;
 % Load data for testing
 addpath('C:\Users\jonesg5\Documents\GitHub\d12pack');
 
-% Create SourceData and initialize to empty value;
+% Create SourceData and initialize to empty value
 handles.SourceData = [];
+
+% Create Selections and initialize to empty value
+handles.Selections = Selection.empty;
 
 % Create ActiveDataIdx and initialize to zero
 handles.ActiveDataIdx = 0;
@@ -418,6 +421,13 @@ function listbox_selections_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_selections contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_selections
 
+handles.ActiveSelectionIdx = getSelectionIndex(handles);
+
+updateActiveSelection(handles);
+
+% Update handles structure
+guidata(handles.figure1, handles);
+
 
 % --- Executes during object creation, after setting all properties.
 function listbox_selections_CreateFcn(hObject, eventdata, handles)
@@ -440,6 +450,8 @@ function popupmenu_filtertype_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu_filtertype contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu_filtertype
+
+updateSelectionList(handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -528,11 +540,30 @@ end
 % Change the active data index to the target data index
 handles.ActiveDataIdx = TargetDataIdx;
 
+% Convert data to selections
+handles.Selections = d12pack2selections(handles.SourceData(handles.ActiveDataIdx));
+
+% Set active selection slection index
+if numel(handles.Selections) > 0
+    handles.ActiveSelectionIdx = 1;
+else
+    handles.ActiveSelectionIdx = 0;
+end
+
+% Update list
+updateSelectionList(handles);
+
+% Update editor
+updateActiveSelection(handles);
+
 % Disable/Enable buttons
-checkButtons(handles)
+checkButtons(handles);
 
 % Disable/Enable menus
-checkMenus(handles)
+checkMenus(handles);
+
+% Disable/Enable selection types
+checkTypes(handles)
 
 % Plot data
 handles = plotData(handles);
@@ -585,6 +616,45 @@ else
     end
 end
 
+function checkTypes(handles)
+filterString = {'All Types'};
+
+if isprop(handles.SourceData(handles.ActiveDataIdx),'BedLog')
+    handles.radiobutton_bed.Enable = 'on';
+    filterString = vertcat(filterString,{'Bed'});
+else
+    handles.radiobutton_bed.Enable = 'off';
+end
+
+if isprop(handles.SourceData(handles.ActiveDataIdx),'Error')
+    handles.radiobutton_error.Enable = 'on';
+    filterString = vertcat(filterString,{'Device Error'});
+else
+    handles.radiobutton_error.Enable = 'off';
+end
+
+if isprop(handles.SourceData(handles.ActiveDataIdx),'Compliance')
+    handles.radiobutton_noncompliance.Enable = 'on';
+    filterString = vertcat(filterString,{'Noncompliance'});
+else
+    handles.radiobutton_noncompliance.Enable = 'off';
+end
+
+if isprop(handles.SourceData(handles.ActiveDataIdx),'Observation')
+    handles.radiobutton_observation.Enable = 'on';
+    filterString = vertcat(filterString,{'Observation'});
+else
+    handles.radiobutton_observation.Enable = 'off';
+end
+
+if isprop(handles.SourceData(handles.ActiveDataIdx),'WorkLog')
+    handles.radiobutton_work.Enable = 'on';
+    filterString = vertcat(filterString,{'Work'});
+else
+    handles.radiobutton_work.Enable = 'off';
+end
+
+handles.popupmenu_filtertype.String = filterString;
 
 % --- Executes during object creation, after setting all properties.
 function axes_detail_CreateFcn(hObject, eventdata, handles)
@@ -630,3 +700,87 @@ hObj = findobj(handles.figure1,'Tag',varName);
 for iObj = 1:numel(hObj)
     hObj(iObj).Visible = visString;
 end
+
+function updateSelectionList(handles)
+
+filter = handles.popupmenu_filtertype.String{handles.popupmenu_filtertype.Value};
+
+switch filter
+    case 'All Types'
+        idxFilter = true(size(handles.Selections));
+    case 'Bed'
+        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Bed;
+    case 'Device Error'
+        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Error;
+    case 'Noncompliance'
+        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Noncompliance;
+    case 'Observation'
+        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Observation;
+    case 'Work'
+        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Work;
+    otherwise
+        
+end
+
+if any(idxFilter)
+    listString = handles.Selections.string;
+    listString = listString(idxFilter);
+    enable = 'on';
+else
+    listString = 'none';
+    enable = 'off';
+end
+
+handles.listbox_selections.Value = 1;
+handles.listbox_selections.String = listString;
+handles.listbox_selections.Max = numel(listString);
+handles.listbox_selections.Enable = enable;
+
+
+function idx = getSelectionIndex(handles)
+
+string = handles.listbox_selections.String;
+value  = handles.listbox_selections.Value;
+sel    = string(value);
+
+if any(strcmpi(sel,'none'))
+    idx = 0;
+else
+    idx = str2double(regexprep(sel,'^\s*(\d+)\s.*$','$1'));
+end
+
+
+function updateActiveSelection(handles)
+
+if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
+    Lim  = handles.Selections(handles.ActiveSelectionIdx).Lim;
+    
+    dateFormat =  1; % 'dd-mmm-yyyy', ex. 01-Mar-2000
+    timeFormat = 13; % 'HH:MM:SS', ex. 15:45:17
+    
+    sDate = datestr(Lim(1),dateFormat);
+    sTime = datestr(Lim(1),timeFormat);
+    startString = sprintf('%s\n%s',sDate,sTime);
+    
+    eDate = datestr(Lim(2),dateFormat);
+    eTime = datestr(Lim(2),timeFormat);
+    endString = sprintf('%s\n%s',eDate,eTime);
+    
+    enable = 'on';
+    
+    Type = handles.Selections(handles.ActiveSelectionIdx).Type;
+    buttonTag = ['radiobutton_',lower(char(Type(1)))];
+    button = findobj(handles.uibuttongroup_type,'Tag',buttonTag);
+    handles.uibuttongroup_type.SelectedObject = button;
+else
+    startString = '';
+    endString = '';
+    
+    enable = 'off';
+end
+
+handles.text_start.String = startString;
+handles.text_end.String   = endString;
+
+handles.text_startLabel.Enable = enable;
+handles.text_endLabel.Enable   = enable;
