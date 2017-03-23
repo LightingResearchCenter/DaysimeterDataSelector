@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 22-Mar-2017 17:58:18
+% Last Modified by GUIDE v2.5 23-Mar-2017 13:54:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,13 +70,6 @@ handles.ActiveDataIdx = 0;
 % Enable only valid buttons and menus
 checkButtons(handles)
 checkMenus(handles)
-
-% % Plot draggable lines
-% x1 = handles.axes_detail.XLim(1) + 0.15*diff(handles.axes_detail.XLim);
-% x2 = handles.axes_detail.XLim(2) - 0.15*diff(handles.axes_detail.XLim);
-% handles.h_b_line = DraggableLine(handles.axes_detail, x1, 2, 'blue');
-% handles.h_r_line = DraggableLine(handles.axes_detail, x2, 2, 'red');
-
 
 % Update handles structure
 guidata(hObject, handles);
@@ -493,14 +486,40 @@ function pushbutton_minusend_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_minusend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[~,idx] = min(abs(handles.Selections(handles.ActiveSelectionIdx).Lim(2)-handles.DisplayData.Time));
+if idx > 1
+    idx = idx - 1;
+end
+position = handles.DisplayData.Time(idx);
+handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
+
+%Update app data
+guidata(handles.figure1,handles);
 
 % --- Executes on button press in pushbutton_plusend.
 function pushbutton_plusend_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_plusend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[~,idx] = min(abs(handles.Selections(handles.ActiveSelectionIdx).Lim(2)-handles.DisplayData.Time));
+if idx < numel(handles.DisplayData.Time)
+    idx = idx + 1;
+end
+position = handles.DisplayData.Time(idx);
+handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
+
+%Update app data
+guidata(handles.figure1,handles);
 
 % --- Executes on button press in pushbutton_pickend.
 function pushbutton_pickend_Callback(hObject, eventdata, handles)
@@ -514,14 +533,40 @@ function pushbutton_minusstart_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_minusstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[~,idx] = min(abs(handles.Selections(handles.ActiveSelectionIdx).Lim(1)-handles.DisplayData.Time));
+if idx > 1
+    idx = idx - 1;
+end
+position = handles.DisplayData.Time(idx);
+handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
+
+%Update app data
+guidata(handles.figure1,handles);
 
 % --- Executes on button press in pushbutton_plusstart.
 function pushbutton_plusstart_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_plusstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[~,idx] = min(abs(handles.Selections(handles.ActiveSelectionIdx).Lim(1)-handles.DisplayData.Time));
+if idx < numel(handles.DisplayData.Time)
+    idx = idx + 1;
+end
+position = handles.DisplayData.Time(idx);
+handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
+
+%Update app data
+guidata(handles.figure1,handles);
 
 % --- Executes on button press in pushbutton_pickstart.
 function pushbutton_pickstart_Callback(hObject, eventdata, handles)
@@ -726,12 +771,22 @@ if any(idxFilter)
     listString = handles.Selections.string;
     listString = listString(idxFilter);
     enable = 'on';
+    idx = str2idx(listString);
+    if numel(handles.ActiveSelectionIdx) == 1 && any(ismember(handles.ActiveSelectionIdx,idx))
+        [lia,locb] = ismember(handles.ActiveSelectionIdx,idx);
+        value = locb(lia);
+    else
+        value = 1;
+        handles.ActiveSelectionIdx = 0;
+    end
 else
     listString = 'none';
     enable = 'off';
+    value = 1;
+    handles.ActiveSelectionIdx = 0;
 end
 
-handles.listbox_selections.Value = 1;
+handles.listbox_selections.Value = value;
 handles.listbox_selections.String = listString;
 handles.listbox_selections.Max = numel(listString);
 handles.listbox_selections.Enable = enable;
@@ -746,14 +801,20 @@ sel    = string(value);
 if any(strcmpi(sel,'none'))
     idx = 0;
 else
-    idx = str2double(regexprep(sel,'^\s*(\d+)\s.*$','$1'));
+    idx = str2idx(sel);
 end
 
+function idx = str2idx(str)
+expression = '^\s*(\d+)\s.*$';
+idx = str2double(regexprep(str,expression,'$1'));
 
 function updateActiveSelection(handles)
 
 if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
     Lim  = handles.Selections(handles.ActiveSelectionIdx).Lim;
+    
+    handles.dragLine1.Position = Lim(1);
+    handles.dragLine2.Position = Lim(2);
     
     dateFormat =  1; % 'dd-mmm-yyyy', ex. 01-Mar-2000
     timeFormat = 13; % 'HH:MM:SS', ex. 15:45:17
@@ -784,3 +845,35 @@ handles.text_end.String   = endString;
 
 handles.text_startLabel.Enable = enable;
 handles.text_endLabel.Enable   = enable;
+
+handles.dragLine1.Visible = enable;
+handles.dragLine2.Visible = enable;
+
+% Buttons
+handles.pushbutton_pickstart.Enable  = enable;
+handles.pushbutton_plusstart.Enable  = enable;
+handles.pushbutton_minusstart.Enable = enable;
+
+handles.pushbutton_pickend.Enable  = enable;
+handles.pushbutton_plusend.Enable  = enable;
+handles.pushbutton_minusend.Enable = enable;
+
+
+function StopDragFcn(hObject,eventdata,handles)
+
+if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
+    handles.dragLine1.Position = Snap(handles.dragLine1.Position,handles);
+    handles.dragLine2.Position = Snap(handles.dragLine2.Position,handles);
+    
+    Lim = sort([handles.dragLine1.Position,handles.dragLine2.Position]);
+    handles.Selections(handles.ActiveSelectionIdx).Lim = Lim;
+end
+
+updateActiveSelection(handles);
+updateSelectionList(handles)
+
+guidata(handles.figure1,handles);
+
+function closest = Snap(position,handles)
+[~,idx] = min(abs(position - handles.DisplayData.Time));
+closest = handles.DisplayData.Time(idx);
