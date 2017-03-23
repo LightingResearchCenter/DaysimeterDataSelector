@@ -447,7 +447,8 @@ function popupmenu_filtertype_Callback(hObject, eventdata, handles)
 
 handles = updateSelectionList(handles);
 handles = updateActiveSelection(handles);
-
+% Refocus
+refocusSelection(handles);
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu_filtertype_CreateFcn(hObject, eventdata, handles)
@@ -515,6 +516,26 @@ function pushbutton_removeselection_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_removeselection (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+qStr = 'Are you sure you want to remove this selection(s)?';
+qTitle = 'Remove Selection(s)?';
+button = questdlg(qStr,qTitle,'Yes','No','No');
+
+if strcmpi(button,'Yes') % Only delete data if response is Yes
+    handles.Selections(handles.ActiveSelectionIdx) = [];
+    
+    handles.ActiveSelectionIdx = 0;
+    
+    % Update the selection list
+    handles = updateSelectionList(handles);
+    
+    % Update the editor
+    handles = updateActiveSelection(handles);
+    
+    % Refocus
+    refocusSelection(handles);
+    
+    guidata(handles.figure1,handles)
+end
 
 
 % --- Executes on button press in pushbutton_autoselect.
