@@ -251,7 +251,7 @@ zoomLevel_days = days(getXZoom(handles));
 handles.slider_detailposition.SliderStep = [0.01*zoomLevel_days,0.1*zoomLevel_days];
  
 
-%% Menus
+% Menus
 
 % --------------------------------------------------------------------
 function menu_file_Callback(hObject, eventdata, handles)
@@ -368,7 +368,6 @@ function context_autosave_location_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-%%
 % --- Executes on button press in pushbutton_back.
 function pushbutton_back_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_back (see GCBO)
@@ -526,7 +525,18 @@ function pushbutton_pickend_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_pickend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+tz = handles.DisplayData.Time.TimeZone;
+position = datetime(handles.slider_detailposition.Value,'ConvertFrom','datenum','TimeZone',tz);
+position = Snap(position,handles);
+handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
+
+%Update app data
+guidata(handles.figure1,handles);
 
 % --- Executes on button press in pushbutton_minusstart.
 function pushbutton_minusstart_Callback(hObject, eventdata, handles)
@@ -573,9 +583,20 @@ function pushbutton_pickstart_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_pickstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+tz = handles.DisplayData.Time.TimeZone;
+position = datetime(handles.slider_detailposition.Value,'ConvertFrom','datenum','TimeZone',tz);
+position = Snap(position,handles);
+handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
+% Update editor
+updateActiveSelection(handles);
+% Update list
+updateSelectionList(handles);
 
-%% Change data set
+%Update app data
+guidata(handles.figure1,handles);
+
+% Change data set
 function changeDataSet(hObject,handles,TargetDataIdx)
 
 if TargetDataIdx == handles.ActiveDataIdx
