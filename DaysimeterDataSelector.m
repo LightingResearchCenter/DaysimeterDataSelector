@@ -618,6 +618,9 @@ else
     handles.ActiveSelectionIdx = 0;
 end
 
+% Plot data
+handles = plotData(handles);
+
 % Update list
 updateSelectionList(handles);
 
@@ -632,9 +635,6 @@ checkMenus(handles);
 
 % Disable/Enable selection types
 checkTypes(handles)
-
-% Plot data
-handles = plotData(handles);
 
 % Set title
 handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
