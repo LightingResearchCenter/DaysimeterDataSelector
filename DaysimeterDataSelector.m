@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 23-Mar-2017 13:54:58
+% Last Modified by GUIDE v2.5 23-Mar-2017 16:16:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -415,7 +415,7 @@ function listbox_selections_Callback(hObject, eventdata, handles)
 
 handles.ActiveSelectionIdx = getSelectionIndex(handles);
 
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 
 refocusSelection(handles);
 
@@ -445,7 +445,8 @@ function popupmenu_filtertype_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu_filtertype contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu_filtertype
 
-updateSelectionList(handles)
+handles = updateSelectionList(handles);
+handles = updateActiveSelection(handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -467,6 +468,47 @@ function pushbutton_addselection_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Switch axes side
+yyaxis(handles.axes_detail,'left')
+
+% Calculate position to start at
+x1 = handles.axes_detail.XLim(1) + 0.15*diff(handles.axes_detail.XLim);
+x2 = handles.axes_detail.XLim(2) - 0.15*diff(handles.axes_detail.XLim);
+
+filter = handles.popupmenu_filtertype.String{handles.popupmenu_filtertype.Value};
+
+switch filter
+    case 'All Types'
+        type = SelectionType.Noncompliance;
+    case 'Bed'
+        type = SelectionType.Bed;
+    case 'Device Error'
+        type = SelectionType.Error;
+    case 'Noncompliance'
+        type = SelectionType.Noncompliance;
+    case 'Observation'
+        type = SelectionType.Observation;
+    case 'Work'
+        type = SelectionType.Work;
+    otherwise
+        error('Filter not recognized.');
+end
+
+% Change ActiveSelectionIdx to 1 more than the max
+idx = numel(handles.Selections)+1;
+
+% Create a new selection and add it to the list
+handles.Selections(idx,1) = Selection([x1,x2],type);
+
+handles.ActiveSelectionIdx = idx;
+
+% Update the selection list
+handles = updateSelectionList(handles);
+
+% Update the editor
+handles = updateActiveSelection(handles);
+
+guidata(handles.figure1,handles)
 
 % --- Executes on button press in pushbutton_removeselection.
 function pushbutton_removeselection_Callback(hObject, eventdata, handles)
@@ -495,9 +537,9 @@ position = handles.DisplayData.Time(idx);
 handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -515,9 +557,9 @@ position = handles.DisplayData.Time(idx);
 handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -533,9 +575,9 @@ position = Snap(position,handles);
 handles.Selections(handles.ActiveSelectionIdx).Lim(2) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -553,9 +595,9 @@ position = handles.DisplayData.Time(idx);
 handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -573,9 +615,9 @@ position = handles.DisplayData.Time(idx);
 handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -591,9 +633,9 @@ position = Snap(position,handles);
 handles.Selections(handles.ActiveSelectionIdx).Lim(1) = position;
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 %Update app data
 guidata(handles.figure1,handles);
@@ -622,10 +664,10 @@ end
 handles = plotData(handles);
 
 % Update list
-updateSelectionList(handles);
+handles = updateSelectionList(handles);
 
 % Update editor
-updateActiveSelection(handles);
+handles = updateActiveSelection(handles);
 
 % Disable/Enable buttons
 checkButtons(handles);
@@ -772,7 +814,7 @@ for iObj = 1:numel(hObj)
     hObj(iObj).Visible = visString;
 end
 
-function updateSelectionList(handles)
+function varargout = updateSelectionList(handles)
 
 filter = handles.popupmenu_filtertype.String{handles.popupmenu_filtertype.Value};
 
@@ -790,7 +832,7 @@ switch filter
     case 'Work'
         idxFilter = vertcat(handles.Selections.Type) == SelectionType.Work;
     otherwise
-        
+        error('Filter not recognized.');
 end
 
 if any(idxFilter)
@@ -803,19 +845,25 @@ if any(idxFilter)
         value = locb(lia);
     else
         value = 1;
-        handles.ActiveSelectionIdx = 0;
     end
 else
     listString = 'none';
     enable = 'off';
     value = 1;
-    handles.ActiveSelectionIdx = 0;
 end
 
 handles.listbox_selections.Value = value;
 handles.listbox_selections.String = listString;
 handles.listbox_selections.Max = numel(listString);
 handles.listbox_selections.Enable = enable;
+
+handles.ActiveSelectionIdx = getSelectionIndex(handles);
+
+if nargout == 1
+    varargout{1} = handles;
+end
+
+guidata(handles.figure1,handles)
 
 
 function idx = getSelectionIndex(handles)
@@ -836,9 +884,9 @@ function idx = str2idx(str)
 expression = '^\s*(\d+)\s.*$'; % Extract just the first number
 idx = str2double(regexprep(str,expression,'$1'));
 
-function updateActiveSelection(handles)
+function varargout = updateActiveSelection(handles)
 
-if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
+if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx > 0
     Lim  = handles.Selections(handles.ActiveSelectionIdx).Lim;
     
     handles.dragLine1.Position = Lim(1);
@@ -886,6 +934,12 @@ handles.pushbutton_pickend.Enable  = enable;
 handles.pushbutton_plusend.Enable  = enable;
 handles.pushbutton_minusend.Enable = enable;
 
+if nargout == 1
+    varargout{1} = handles;
+end
+
+guidata(handles.figure1,handles);
+
 
 function StopDragFcn(hObject,eventdata,handles)
 
@@ -897,8 +951,8 @@ if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
     handles.Selections(handles.ActiveSelectionIdx).Lim = Lim;
 end
 
-updateActiveSelection(handles);
-updateSelectionList(handles)
+handles = updateActiveSelection(handles);
+handles = updateSelectionList(handles);
 
 guidata(handles.figure1,handles);
 
