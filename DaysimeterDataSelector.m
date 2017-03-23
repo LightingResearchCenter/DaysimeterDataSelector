@@ -417,6 +417,8 @@ handles.ActiveSelectionIdx = getSelectionIndex(handles);
 
 updateActiveSelection(handles);
 
+refocusSelection(handles);
+
 % Update handles structure
 guidata(handles.figure1, handles);
 
@@ -644,6 +646,9 @@ setSliderStep(handles);
 % Position detail window
 handles = reposition_detail_window(handles);
 
+% Refocus selection
+refocusSelection(handles)
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -826,7 +831,9 @@ else
 end
 
 function idx = str2idx(str)
-expression = '^\s*(\d+)\s.*$';
+% Convert string entries in listbox to Selection indicies
+
+expression = '^\s*(\d+)\s.*$'; % Extract just the first number
 idx = str2double(regexprep(str,expression,'$1'));
 
 function updateActiveSelection(handles)
@@ -898,3 +905,20 @@ guidata(handles.figure1,handles);
 function closest = Snap(position,handles)
 [~,idx] = min(abs(position - handles.DisplayData.Time));
 closest = handles.DisplayData.Time(idx);
+
+function refocusSelection(handles)
+
+if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx > 0
+    Lim = handles.Selections(handles.ActiveSelectionIdx).Lim;
+    zoomLevel = getXZoom(handles);
+    if (Lim(2)-Lim(1)) <= zoomLevel
+        value = datenum(Lim(1) + (Lim(2)-Lim(1))/2);
+    else
+        value = datenum(Lim(1));
+    end
+    handles.slider_detailposition.Value = value;
+    % Position detail window
+    handles = reposition_detail_window(handles);
+end
+
+guidata(handles.figure1,handles);
