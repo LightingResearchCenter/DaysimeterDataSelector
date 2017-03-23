@@ -5,17 +5,14 @@ classdef DraggableLine
     %% properties public
     properties % (Access = public)
         Handle
+        StopDragFcn = @(hObject,eventdata)DaysimeterDataSelector('StopDragFcn',hObject,eventdata,guidata(hObject))
     end % end of properties public
     
     %% properties dependent
     properties (Dependent = true)
         Position
+        Visible
     end % end of properties dependent
-    
-    %% properties protected
-    properties (Access = protected)
-        
-    end % end of properties protected
     
     %% methods public
     methods % (Access = public)
@@ -71,12 +68,20 @@ classdef DraggableLine
         
         %--- Property Access Methods ---%
         function obj = set.Position(obj,position)
-            obj.Handle.XData = position*[1 1];
+            obj.Handle.XData = [position position];
         end % end of set Position
         
         function position = get.Position(obj)
             position = obj.Handle.XData(1);
         end % end of get Position
+        
+        function obj = set.Visible(obj,visible)
+            obj.Handle.Visible = visible;
+        end
+        
+        function visible = get.Visible(obj)
+            visible = obj.Handle.Visible;
+        end
         
     end % end of methods public
     
@@ -100,6 +105,9 @@ classdef DraggableLine
             axes(obj.Handle.Parent);
             f = gcf;
             f.WindowButtonMotionFcn = @(src,eventdata)obj.mouseMove(src,eventdata);
+            if ~isempty(obj.StopDragFcn)
+                feval(obj.StopDragFcn,src,eventdata);
+            end
         end % end of stopDrag
         
         %--- Hover Methods ---%
