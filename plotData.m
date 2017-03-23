@@ -25,6 +25,9 @@ for iVar = 1:numel(varNames)
     handles = detailPlot(handles,varNames{iVar});
 end
 
+% Plot draggable lines
+handles = dragLines(handles);
+
 % Format axes
 yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
 yMaxRight = max([1;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
@@ -155,5 +158,37 @@ switch varName
     otherwise
         error('Unrecognized varName');
 end
+
+end
+
+function handles = dragLines(handles)
+% Switch axes side
+yyaxis(handles.axes_detail,'left')
+
+% Define line colors
+color1 = 'blue';
+color2 = 'red';
+
+% Calculate position to start lines at
+x1 = handles.axes_detail.XLim(1) + 0.15*diff(handles.axes_detail.XLim);
+x2 = handles.axes_detail.XLim(2) - 0.15*diff(handles.axes_detail.XLim);
+
+% See if handle already exists
+if ~isfield(handles, 'dragLine1') || ~isfield(handles, 'dragLine2')
+    % Check for leftover draggable lines and remove them
+    hObj = findobj(handles.axes_detail,'Tag','draggable');
+    delete(hObj);
+    
+    % Create new lines
+    handles.dragLine1 = DraggableLine(handles.axes_detail, x1, 2, color1);
+    handles.dragLine2 = DraggableLine(handles.axes_detail, x2, 2, color2);
+else
+    handles.dragLine1.Position = x1;
+    handles.dragLine2.Position = x2;
+end
+
+% Set line visibility
+handles.dragLine1.Visible = 'off';
+handles.dragLine2.Visible = 'off';
 
 end
