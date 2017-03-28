@@ -820,9 +820,23 @@ function axes_detail_CreateFcn(hObject, eventdata, handles)
 % Hint: place code in OpeningFcn to populate axes_detail
 
 % Make dual axis
+yyaxis(hObject,'left')
+
+% Format left axis
+hObject.YColor = [0.15 0.15 0.15];
+n = numel(hObject.YTick);
+
+% Format right axis
 yyaxis(hObject,'right')
 hObject.YScale = 'log';
-
+hObject.YColor = [0.15 0.15 0.15];
+hObject.YLim = [0.1, 10^5];
+expoInc = (log10(hObject.YLim(2)) - log10(hObject.YLim(1)))/(n-1);
+expo = log10(hObject.YLim(1)):expoInc:log10(hObject.YLim(2));
+hObject.YTick = 10.^(expo);
+ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
+ylabels(1) = "(0)";
+hObject.YTickLabel = ylabels;
 
 % --- Executes during object creation, after setting all properties.
 function axes_overview_CreateFcn(hObject, eventdata, handles)
@@ -835,9 +849,12 @@ function axes_overview_CreateFcn(hObject, eventdata, handles)
 % Make dual axis
 yyaxis(hObject,'right')
 hObject.YScale = 'log';
+hObject.YColor = [0.15 0.15 0.15];
+hObject.YTick = [];
 
 % Create highlight
 yyaxis(hObject,'left')
+hObject.YColor = [0.15 0.15 0.15];
 hold(hObject,'on');
 area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[1, 1, 1],'EdgeColor','none','Tag','OverviewHighlight');
 

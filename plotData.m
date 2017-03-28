@@ -18,8 +18,15 @@ handles.DisplayData.Time = handles.SourceData(idx).Time;
 varNames = {'ActivityIndex','CircadianStimulus','CircadianLight','Illuminance'};
 
 for iVar = 1:numel(varNames)
-    % Conver data to simple form
+    % Convert data to simple form
     handles.DisplayData.(varNames{iVar}) = handles.SourceData(idx).(varNames{iVar});
+    
+    % Force low values to 0.1 for data that is displayed on a log scale
+    if ismember(varNames{iVar},{'CircadianLight','Illuminance'})
+        idxLow = handles.DisplayData.(varNames{iVar}) < 0.1;
+        handles.DisplayData.(varNames{iVar})(idxLow) = 0.1;
+    end
+    
     % Plot data
     handles = overviewPlot(handles,varNames{iVar});
     handles = detailPlot(handles,varNames{iVar});
@@ -30,7 +37,7 @@ handles = dragLines(handles);
 
 % Format axes
 yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
-yMaxRight = max([1;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
+yMaxRight = max([10^5;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
 
 % Overview
 yyaxis(handles.axes_overview,'left')
@@ -49,10 +56,18 @@ handles.axes_overview.YLim = [0.1,yMaxRight];
 yyaxis(handles.axes_detail,'left')
 handles.axes_detail.YLimMode = 'manual';
 handles.axes_detail.YLim = [0,yMaxLeft];
+n = numel(handles.axes_detail.YTick);
 
 yyaxis(handles.axes_detail,'right')
 handles.axes_detail.YLimMode = 'manual';
 handles.axes_detail.YLim = [0.1,yMaxRight];
+
+expoInc = (log10(yMaxRight) - log10(0.1))/(n-1);
+expo = log10(0.1):expoInc:log10(yMaxRight);
+handles.axes_detail.YTick = 10.^(expo);
+ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
+ylabels(1) = "(0)";
+handles.axes_detail.YTickLabel = ylabels;
 
 % stopBusy(handles,jObj,'done');
 
@@ -141,19 +156,19 @@ function [axSide,color,displayName] = getVarProp(varName)
 switch varName
     case 'ActivityIndex'
         axSide = 'left';
-        color = 'red';
+        color  = [0 0 0]; % black
         displayName = 'Activity Index (AI)';
     case 'CircadianStimulus'
         axSide = 'left';
-        color = 'blue';
+        color  = [0.651 0.808 0.890]; % light blue
         displayName = 'Circadian Stimulus (CS)';
     case 'CircadianLight'
         axSide = 'right';
-        color = 'green';
+        color  = [0.698 0.875 0.541]; % light green
         displayName = 'Circadian Light (CLA)';
     case 'Illuminance'
         axSide = 'right';
-        color = 'black';
+        color  = [0.992 0.749 0.435]; % light orange
         displayName = 'Illuminance (lux)';
     otherwise
         error('Unrecognized varName');
@@ -166,8 +181,8 @@ function handles = dragLines(handles)
 yyaxis(handles.axes_detail,'left')
 
 % Define line colors
-color1 = 'blue';
-color2 = 'red';
+color1 = [0.122 0.471 0.706]; % dark blue
+color2 = [0.890 0.102 0.110]; % dark red
 
 % Calculate position to start lines at
 x1 = handles.axes_detail.XLim(1) + 0.15*diff(handles.axes_detail.XLim);
