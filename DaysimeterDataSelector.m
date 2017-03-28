@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 27-Mar-2017 14:55:03
+% Last Modified by GUIDE v2.5 28-Mar-2017 14:28:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -850,7 +850,7 @@ else
 end
 
 % Search for object with matching tag
-hObj = findobj(hObject,'Tag',varName);
+hObj = findobj(handles.figure1,'Tag',varName);
 
 for iObj = 1:numel(hObj)
     hObj(iObj).Visible = visString;
