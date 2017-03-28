@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 28-Mar-2017 17:10:02
+% Last Modified by GUIDE v2.5 28-Mar-2017 17:25:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1094,23 +1094,55 @@ hObject.Color  = 'none';
 hObject.XColor = 'none';
 hObject.YColor = 'none';
 % AI
-plot(hObject,[-2,0,2],[2,2,2],'-o','Color',[0 0 0])
+plot(hObject,[-2,0,2],[5,5,5],'-o','Color',[0 0 0])
 % CS
-plot(hObject,[-2,0,2],[1,1,1],'-o','Color',[0.651 0.808 0.890])
-
-
-% --- Executes during object creation, after setting all properties.
-function axes11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: place code in OpeningFcn to populate axes11
-hold(hObject,'on');
-hObject.Color  = 'none';
-hObject.XColor = 'none';
-hObject.YColor = 'none';
+plot(hObject,[-2,0,2],[4,4,4],'-o','Color',[0.651 0.808 0.890])
 % CLA
 plot(hObject,[-2,0,2],[2,2,2],'-o','Color',[0.698 0.875 0.541])
 % Illuminance
 plot(hObject,[-2,0,2],[1,1,1],'-o','Color',[0.992 0.749 0.435])
+
+
+% --- Executes on button press in checkbox_bed.
+function checkbox_bed_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_bed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_bed
+
+
+% --- Executes on button press in checkbox_error.
+function checkbox_error_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_error (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_error
+
+
+% --- Executes on button press in checkbox_noncompliance.
+function checkbox_noncompliance_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_noncompliance (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_noncompliance
+
+
+% --- Executes on button press in checkbox_observation.
+function checkbox_observation_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_observation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_observation
+
+
+% --- Executes on button press in checkbox_work.
+function checkbox_work_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_work (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_work
