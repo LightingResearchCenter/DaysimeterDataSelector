@@ -741,6 +741,16 @@ else
     handles.pushbutton_forward.Enable = 'on';
 end
 
+if isedited(handles)
+    handles.pushbutton_savechanges.Enable   = 'on';
+    handles.pushbutton_revertchanges.Enable = 'on';
+else
+    handles.pushbutton_savechanges.Enable   = 'off';
+    handles.pushbutton_revertchanges.Enable = 'off';
+end
+
+
+
 function checkMenus(handles)
 
 if isempty(handles.SourceData)
@@ -1049,6 +1059,7 @@ function handles = markEdit(hObject,handles)
 
 handles.EditCount = handles.EditCount + 1;
 
-display(handles.EditCount)
+% Disable/Enable buttons
+checkButtons(handles);
 
 guidata(hObject,handles);
