@@ -70,7 +70,6 @@ ylabels(1) = "(0)";
 handles.axes_detail.YTickLabel = ylabels;
 
 % stopBusy(handles,jObj,'done');
-
 end
 
 
@@ -197,6 +196,9 @@ if ~isfield(handles, 'dragLine1') || ~isfield(handles, 'dragLine2')
     % Create new lines
     handles.dragLine1 = DraggableLine(handles.axes_detail, x1, 2, color1);
     handles.dragLine2 = DraggableLine(handles.axes_detail, x2, 2, color2);
+    
+    handles.dragLine1.Handle.DisplayName = 'Selection Start';
+    handles.dragLine2.Handle.DisplayName = 'Selection End';
 else
     handles.dragLine1.Position = x1;
     handles.dragLine2.Position = x2;

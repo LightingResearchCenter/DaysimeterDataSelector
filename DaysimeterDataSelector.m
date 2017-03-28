@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 28-Mar-2017 14:28:43
+% Last Modified by GUIDE v2.5 28-Mar-2017 17:10:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1080,3 +1080,37 @@ handles.EditCount = handles.EditCount + 1;
 checkButtons(handles);
 
 guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function axes10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes10
+hold(hObject,'on');
+hObject.Color  = 'none';
+hObject.XColor = 'none';
+hObject.YColor = 'none';
+% AI
+plot(hObject,[-2,0,2],[2,2,2],'-o','Color',[0 0 0])
+% CS
+plot(hObject,[-2,0,2],[1,1,1],'-o','Color',[0.651 0.808 0.890])
+
+
+% --- Executes during object creation, after setting all properties.
+function axes11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes11
+hold(hObject,'on');
+hObject.Color  = 'none';
+hObject.XColor = 'none';
+hObject.YColor = 'none';
+% CLA
+plot(hObject,[-2,0,2],[2,2,2],'-o','Color',[0.698 0.875 0.541])
+% Illuminance
+plot(hObject,[-2,0,2],[1,1,1],'-o','Color',[0.992 0.749 0.435])
