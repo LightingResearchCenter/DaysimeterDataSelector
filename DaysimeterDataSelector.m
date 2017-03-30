@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 28-Mar-2017 17:25:02
+% Last Modified by GUIDE v2.5 30-Mar-2017 10:21:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,9 +70,11 @@ handles.ActiveDataIdx = 0;
 % Create EditCount and initialize to zero
 handles.EditCount = 0;
 
-% Enable only valid buttons and menus
-checkButtons(handles)
-checkMenus(handles)
+% Contrsuct filter options
+handles = makeFilterOptions(hObject, handles);
+
+% Validate controls
+handles = validateControls(hObject, handles);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -420,6 +422,8 @@ handles.ActiveSelectionIdx = getSelectionIndex(handles);
 
 handles = updateActiveSelection(hObject,handles);
 
+handles = validateControls(hObject, handles);
+
 refocusSelection(hObject,handles);
 
 % Update handles structure
@@ -450,6 +454,7 @@ function popupmenu_filtertype_Callback(hObject, eventdata, handles)
 
 handles = updateSelectionList(hObject,handles);
 handles = updateActiveSelection(hObject,handles);
+handles = validateControls(hObject, handles);
 % Refocus
 refocusSelection(hObject,handles);
 
@@ -701,14 +706,11 @@ handles = updateSelectionList(hObject,handles);
 % Update editor
 handles = updateActiveSelection(hObject,handles);
 
-% Disable/Enable buttons
-checkButtons(handles);
+% Construct filter options
+handles = makeFilterOptions(hObject, handles);
 
-% Disable/Enable menus
-checkMenus(handles);
-
-% Disable/Enable selection types
-checkTypes(handles);
+% Validate controls
+handles = validateControls(hObject, handles);
 
 % Set title
 handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
@@ -725,91 +727,6 @@ refocusSelection(hObject,handles)
 
 % Update handles structure
 guidata(hObject, handles);
-
-
-function checkButtons(handles)
-
-if handles.ActiveDataIdx == 1 || handles.ActiveDataIdx == 0
-    handles.pushbutton_back.Enable = 'off';
-else
-    handles.pushbutton_back.Enable = 'on';
-end
-
-if handles.ActiveDataIdx == numel(handles.SourceData)
-    handles.pushbutton_forward.Enable = 'off';
-else
-    handles.pushbutton_forward.Enable = 'on';
-end
-
-if isedited(handles)
-    handles.pushbutton_savechanges.Enable   = 'on';
-    handles.pushbutton_revertchanges.Enable = 'on';
-else
-    handles.pushbutton_savechanges.Enable   = 'off';
-    handles.pushbutton_revertchanges.Enable = 'off';
-end
-
-
-
-function checkMenus(handles)
-
-if isempty(handles.SourceData)
-    handles.menu_data.Enable = 'off';
-else
-    handles.menu_data.Enable = 'on';
-    
-    if handles.ActiveDataIdx == 1 || handles.ActiveDataIdx == 0
-        handles.back.Enable = 'off';
-    else
-        handles.back.Enable = 'on';
-    end
-    
-    if handles.ActiveDataIdx == numel(handles.SourceData)
-        handles.forward.Enable = 'off';
-    else
-        handles.forward.Enable = 'on';
-    end
-end
-
-function checkTypes(handles)
-filterString = {'All Types'};
-
-if isprop(handles.SourceData(handles.ActiveDataIdx),'BedLog')
-    handles.radiobutton_bed.Enable = 'on';
-    filterString = vertcat(filterString,{'Bed'});
-else
-    handles.radiobutton_bed.Enable = 'off';
-end
-
-if isprop(handles.SourceData(handles.ActiveDataIdx),'Error')
-    handles.radiobutton_error.Enable = 'on';
-    filterString = vertcat(filterString,{'Device Error'});
-else
-    handles.radiobutton_error.Enable = 'off';
-end
-
-if isprop(handles.SourceData(handles.ActiveDataIdx),'Compliance')
-    handles.radiobutton_noncompliance.Enable = 'on';
-    filterString = vertcat(filterString,{'Noncompliance'});
-else
-    handles.radiobutton_noncompliance.Enable = 'off';
-end
-
-if isprop(handles.SourceData(handles.ActiveDataIdx),'Observation')
-    handles.radiobutton_observation.Enable = 'on';
-    filterString = vertcat(filterString,{'Observation'});
-else
-    handles.radiobutton_observation.Enable = 'off';
-end
-
-if isprop(handles.SourceData(handles.ActiveDataIdx),'WorkLog')
-    handles.radiobutton_work.Enable = 'on';
-    filterString = vertcat(filterString,{'Work'});
-else
-    handles.radiobutton_work.Enable = 'off';
-end
-
-handles.popupmenu_filtertype.String = filterString;
 
 % --- Executes during object creation, after setting all properties.
 function axes_detail_CreateFcn(hObject, eventdata, handles)
@@ -927,9 +844,13 @@ guidata(hObject,handles)
 
 function idx = getSelectionIndex(handles)
 
-string = handles.listbox_selections.String;
-value  = handles.listbox_selections.Value;
-sel    = string(value);
+str   = handles.listbox_selections.String;
+value = handles.listbox_selections.Value;
+if iscell(str)
+    sel = str(value);
+else
+    sel = str;
+end
 
 if any(strcmpi(sel,'none'))
     idx = 0;
@@ -978,20 +899,8 @@ end
 handles.text_start.String = startString;
 handles.text_end.String   = endString;
 
-handles.text_startLabel.Enable = enable;
-handles.text_endLabel.Enable   = enable;
-
 handles.dragLine1.Visible = enable;
 handles.dragLine2.Visible = enable;
-
-% Buttons
-handles.pushbutton_pickstart.Enable  = enable;
-handles.pushbutton_plusstart.Enable  = enable;
-handles.pushbutton_minusstart.Enable = enable;
-
-handles.pushbutton_pickend.Enable  = enable;
-handles.pushbutton_plusend.Enable  = enable;
-handles.pushbutton_minusend.Enable = enable;
 
 if nargout == 1
     varargout{1} = handles;
@@ -1068,16 +977,13 @@ handles = updateSelectionList(hObject,handles);
 
 guidata(hObject,handles);
 
-function tf = isedited(handles)
-
-tf = handles.EditCount ~= 0;
 
 function handles = markEdit(hObject,handles)
 
 handles.EditCount = handles.EditCount + 1;
 
-% Disable/Enable buttons
-checkButtons(handles);
+% Validate controls
+handles = validateControls(hObject, handles);
 
 guidata(hObject,handles);
 
@@ -1146,3 +1052,12 @@ function checkbox_work_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_work
+
+
+% --- Executes on button press in checkbox_none.
+function checkbox_none_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_none (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_none
