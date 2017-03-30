@@ -125,23 +125,23 @@ end
 
 if isData && isOneSelection
     % Start
-    enable('pushbutton_pickstart')
+    enable('pushbutton_centerstart')
     enable('pushbutton_plusstart')
     enable('pushbutton_minusstart')
     enable('text_startLabel')
     % End
-    enable('pushbutton_pickend')
+    enable('pushbutton_centerend')
     enable('pushbutton_plusend')
     enable('pushbutton_minusend')
     enable('text_endLabel')
 else
     % Start
-    disable('pushbutton_pickstart')
+    disable('pushbutton_centerstart')
     disable('pushbutton_plusstart')
     disable('pushbutton_minusstart')
     disable('text_startLabel')
     % End
-    disable('pushbutton_pickend')
+    disable('pushbutton_centerend')
     disable('pushbutton_plusend')
     disable('pushbutton_minusend')
     disable('text_endLabel')

@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 30-Mar-2017 10:21:22
+% Last Modified by GUIDE v2.5 30-Mar-2017 15:39:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -597,9 +597,9 @@ handles = updateSelectionList(hObject,handles);
 %Update app data
 guidata(hObject,handles);
 
-% --- Executes on button press in pushbutton_pickend.
-function pushbutton_pickend_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_pickend (see GCBO)
+% --- Executes on button press in pushbutton_centerend.
+function pushbutton_centerend_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_centerend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 tz = handles.DisplayData.Time.TimeZone;
@@ -658,9 +658,9 @@ handles = updateSelectionList(hObject,handles);
 %Update app data
 guidata(hObject,handles);
 
-% --- Executes on button press in pushbutton_pickstart.
-function pushbutton_pickstart_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_pickstart (see GCBO)
+% --- Executes on button press in pushbutton_centerstart.
+function pushbutton_centerstart_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_centerstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 tz = handles.DisplayData.Time.TimeZone;
@@ -709,9 +709,6 @@ handles = updateActiveSelection(hObject,handles);
 % Construct filter options
 handles = makeFilterOptions(hObject, handles);
 
-% Validate controls
-handles = validateControls(hObject, handles);
-
 % Set title
 handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
 
@@ -724,6 +721,12 @@ handles = reposition_detail_window(handles);
 
 % Refocus selection
 refocusSelection(hObject,handles)
+
+% Reset edit counter
+handles.EditCount = 0;
+
+% Validate controls
+handles = validateControls(hObject, handles);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -1061,3 +1064,41 @@ function checkbox_none_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_none
+
+
+function revertChanges(hObject, handles)
+
+% Revert Selections to previously saved version
+% Convert data to selections
+handles.Selections = d12pack2selections(handles.SourceData(handles.ActiveDataIdx));
+
+% Set active selection slection index
+if numel(handles.Selections) > 0
+    handles.ActiveSelectionIdx = 1;
+else
+    handles.ActiveSelectionIdx = 0;
+end
+
+% Update list
+handles = updateSelectionList(hObject,handles);
+
+% Update editor
+handles = updateActiveSelection(hObject,handles);
+
+% Construct filter options
+handles = makeFilterOptions(hObject, handles);
+
+% Position detail window
+handles = reposition_detail_window(handles);
+
+% Refocus selection
+refocusSelection(hObject,handles)
+
+% Reset edit counter
+handles.EditCount = 0;
+
+% Validate controls
+handles = validateControls(hObject, handles);
+
+% Update handles structure
+guidata(hObject, handles);
