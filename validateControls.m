@@ -50,6 +50,14 @@ if isData
 else
     disable('menu_data')
 end
+%  --> Save Changes and Revert Changes...
+if isData && handles.EditCount ~= 0
+    enable('savechanges')
+    enable('revertchanges')
+else
+    disable('savechanges')
+    disable('revertchanges')
+end
 %  --> Back
 if isData && handles.ActiveDataIdx > 1
     enable('back')

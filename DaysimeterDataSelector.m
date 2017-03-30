@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 30-Mar-2017 15:39:19
+% Last Modified by GUIDE v2.5 30-Mar-2017 16:05:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1108,3 +1108,24 @@ handles = validateControls(hObject, handles);
 
 % Update handles structure
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function revertchanges_Callback(hObject, eventdata, handles)
+% hObject    handle to revertchanges (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+qStr = 'Are you sure you want to revert unsaved changes to previous state?';
+qTitle = 'Revert Changes?';
+button = questdlg(qStr,qTitle,'Yes','Cancel','Cancel');
+
+if strcmpi(button,'Yes') % Only delete data if response is Yes
+    revertChanges(hObject, handles);
+end
+
+
+% --------------------------------------------------------------------
+function savechanges_Callback(hObject, eventdata, handles)
+% hObject    handle to savechanges (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
