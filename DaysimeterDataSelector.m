@@ -400,7 +400,13 @@ function pushbutton_revertchanges_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_revertchanges (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+qStr = 'Are you sure you want to revert unsaved changes to previous state?';
+qTitle = 'Revert Changes?';
+button = questdlg(qStr,qTitle,'Yes','Cancel','Cancel');
 
+if strcmpi(button,'Yes') % Only delete data if response is Yes
+    revertChanges(hObject, handles);
+end
 
 % --- Executes on button press in pushbutton_savechanges.
 function pushbutton_savechanges_Callback(hObject, eventdata, handles)
@@ -527,7 +533,7 @@ function pushbutton_removeselection_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 qStr = 'Are you sure you want to remove this selection(s)?';
 qTitle = 'Remove Selection(s)?';
-button = questdlg(qStr,qTitle,'Yes','No','No');
+button = questdlg(qStr,qTitle,'Yes','Cancel','Cancel');
 
 if strcmpi(button,'Yes') % Only delete data if response is Yes
     handles.Selections(handles.ActiveSelectionIdx) = [];
