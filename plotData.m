@@ -3,8 +3,6 @@ function handles = plotData(handles)
 %   Detailed explanation goes here
 % handles    structure with handles and user data (see GUIDATA)
 
-% [jObj,handles] = startBusy(handles,'loading...');
-
 % Retrieve index of data to plot
 idx = handles.ActiveDataIdx;
 
@@ -69,7 +67,6 @@ ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
 ylabels(1) = "(0)";
 handles.axes_detail.YTickLabel = ylabels;
 
-% stopBusy(handles,jObj,'done');
 end
 
 

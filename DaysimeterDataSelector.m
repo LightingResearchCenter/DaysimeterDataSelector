@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 30-Mar-2017 16:05:13
+% Last Modified by GUIDE v2.5 30-Mar-2017 16:17:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -127,40 +127,6 @@ reposition_detail_window(handles);
 setSliderStep(handles);
 
 
-% --- Reposition detail window
-function varargout = reposition_detail_window(handles)
-
-zoomLevel = getXZoom(handles);
-
-% Convert slider position to center point
-XCenter = datetime(handles.slider_detailposition.Value,'ConvertFrom','datenum','TimeZone',handles.DisplayData.Time.TimeZone);
-
-% Set detail window axis limits
-XLim1 = XCenter - zoomLevel/2;
-XLim2 = XCenter + zoomLevel/2;
-handles.axes_detail.XLim = [XLim1, XLim2];
-
-handles = reposition_overview_highlight(handles);
-
-if nargout == 1
-    varargout = {handles};
-end
-
-
-% --- Reposition overview highlight
-function varargout = reposition_overview_highlight(handles)
-yyaxis(handles.axes_detail,'left');
-xHighlight = [handles.axes_detail.XLim(1),handles.axes_detail.XLim(1),handles.axes_detail.XLim(2),handles.axes_detail.XLim(2)];
-yHighlight = [    0,    1,    1,    0];
-
-handles.OverviewHighlight = findobj(handles.axes_overview,'Tag','OverviewHighlight');
-set(handles.OverviewHighlight,'XData',xHighlight,'YData',yHighlight);
-
-if nargout == 1
-    varargout = {handles};
-end
-
-
 % --- Executes on button press in checkbox_ActivityIndex.
 function checkbox_ActivityIndex_Callback(hObject, eventdata, handles)
 % hObject    handle to checkbox_ActivityIndex (see GCBO)
@@ -218,44 +184,6 @@ c(cellfun(@isempty,c)) = []; % Remove empty cells.
 d = vertcat(c{:}); % Combine data into an array.
 
 
-% --------------------------------------------------------------------
-function zoomLevel = getXZoom(handles)
-% handles    structure with handles and user data (see GUIDATA)
-
-switch handles.uibuttongroup_zoom.SelectedObject.Tag
-    case 'zoom48'
-        zoomLevel = duration(48,0,0);
-    case 'zoom24'
-        zoomLevel = duration(24,0,0);
-    case 'zoom12'
-        zoomLevel = duration(12,0,0);
-    case 'zoom06'
-        zoomLevel = duration( 6,0,0);
-    case 'zoom02'
-        zoomLevel = duration( 2,0,0);
-    otherwise
-        warning(['Zoom level: ',handles.uibuttongroup_zoom.SelectedObject.Tag,' not recognized.']);
-        zoomLevel = duration(48,0,0);
-end
-
-
-% --------------------------------------------------------------------
-function setSliderLim(handles)
-% handles    structure with handles and user data (see GUIDATA)
-
-handles.slider_detailposition.Min = datenum(handles.DisplayData.Time(1));
-handles.slider_detailposition.Max = datenum(handles.DisplayData.Time(end));
-handles.slider_detailposition.Value = handles.slider_detailposition.Min;
-
-
-% --------------------------------------------------------------------
-function setSliderStep(handles)
-% handles    structure with handles and user data (see GUIDATA)
-
-zoomLevel_days = days(getXZoom(handles));
-handles.slider_detailposition.SliderStep = [0.01*zoomLevel_days,0.1*zoomLevel_days];
-
-
 % Menus
 
 % --------------------------------------------------------------------
@@ -287,15 +215,12 @@ function autosave_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function forward_Callback(hObject, eventdata, handles)
+function forward_Callback(hObject, ~, handles)
 % hObject    handle to forward (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-if handles.ActiveDataIdx < numel(handles.SourceData)
-    TargetDataIdx = handles.ActiveDataIdx + 1;
-    changeDataSet(hObject,handles,TargetDataIdx);
-end
+forward(hObject, handles)
 
 % --------------------------------------------------------------------
 function back_Callback(hObject, eventdata, handles)
@@ -303,10 +228,7 @@ function back_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-if handles.ActiveDataIdx > 1
-    TargetDataIdx = handles.ActiveDataIdx - 1;
-    changeDataSet(hObject,handles,TargetDataIdx);
-end
+backward(hObject, handles)
 
 % --------------------------------------------------------------------
 function jump_Callback(hObject, eventdata, handles)
@@ -379,21 +301,15 @@ function pushbutton_back_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-if handles.ActiveDataIdx > 1
-    TargetDataIdx = handles.ActiveDataIdx - 1;
-    changeDataSet(hObject,handles,TargetDataIdx);
-end
+backward(hObject, handles)
 
 % --- Executes on button press in pushbutton_forward.
-function pushbutton_forward_Callback(hObject, eventdata, handles)
+function pushbutton_forward_Callback(hObject, ~, handles)
 % hObject    handle to pushbutton_forward (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-if handles.ActiveDataIdx < numel(handles.SourceData)
-    TargetDataIdx = handles.ActiveDataIdx + 1;
-    changeDataSet(hObject,handles,TargetDataIdx);
-end
+forward(hObject, handles)
 
 % --- Executes on button press in pushbutton_revertchanges.
 function pushbutton_revertchanges_Callback(hObject, eventdata, handles)
@@ -404,7 +320,7 @@ qStr = 'Are you sure you want to revert unsaved changes to previous state?';
 qTitle = 'Revert Changes?';
 button = questdlg(qStr,qTitle,'Yes','Cancel','Cancel');
 
-if strcmpi(button,'Yes') % Only delete data if response is Yes
+if strcmpi(button,'Yes') % Only revert if response is Yes
     revertChanges(hObject, handles);
 end
 
@@ -603,9 +519,9 @@ handles = updateSelectionList(hObject,handles);
 %Update app data
 guidata(hObject,handles);
 
-% --- Executes on button press in pushbutton_centerend.
-function pushbutton_centerend_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_centerend (see GCBO)
+% --- Executes on button press in pushbutton_pickend.
+function pushbutton_pickend_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_pickend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 tz = handles.DisplayData.Time.TimeZone;
@@ -683,59 +599,6 @@ handles = updateSelectionList(hObject,handles);
 %Update app data
 guidata(hObject,handles);
 
-% Change data set
-function changeDataSet(hObject,handles,TargetDataIdx)
-
-if TargetDataIdx == handles.ActiveDataIdx
-    return
-end
-
-% Change the active data index to the target data index
-handles.ActiveDataIdx = TargetDataIdx;
-
-% Convert data to selections
-handles.Selections = d12pack2selections(handles.SourceData(handles.ActiveDataIdx));
-
-% Set active selection slection index
-if numel(handles.Selections) > 0
-    handles.ActiveSelectionIdx = 1;
-else
-    handles.ActiveSelectionIdx = 0;
-end
-
-% Plot data
-handles = plotData(handles);
-
-% Update list
-handles = updateSelectionList(hObject,handles);
-
-% Update editor
-handles = updateActiveSelection(hObject,handles);
-
-% Construct filter options
-handles = makeFilterOptions(hObject, handles);
-
-% Set title
-handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
-
-% Adjust slider settings to data
-setSliderLim(handles);
-setSliderStep(handles);
-
-% Position detail window
-handles = reposition_detail_window(handles);
-
-% Refocus selection
-refocusSelection(hObject,handles)
-
-% Reset edit counter
-handles.EditCount = 0;
-
-% Validate controls
-handles = validateControls(hObject, handles);
-
-% Update handles structure
-guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function axes_detail_CreateFcn(hObject, eventdata, handles)
@@ -799,125 +662,6 @@ for iObj = 1:numel(hObj)
     hObj(iObj).Visible = visString;
 end
 
-function varargout = updateSelectionList(hObject,handles)
-
-filter = handles.popupmenu_filtertype.String{handles.popupmenu_filtertype.Value};
-
-switch filter
-    case 'All Types'
-        idxFilter = true(size(handles.Selections));
-    case 'Bed'
-        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Bed;
-    case 'Device Error'
-        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Error;
-    case 'Noncompliance'
-        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Noncompliance;
-    case 'Observation'
-        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Observation;
-    case 'Work'
-        idxFilter = vertcat(handles.Selections.Type) == SelectionType.Work;
-    otherwise
-        error('Filter not recognized.');
-end
-
-if any(idxFilter)
-    listString = handles.Selections.string;
-    listString = listString(idxFilter);
-    enable = 'on';
-    idx = str2idx(listString);
-    if numel(handles.ActiveSelectionIdx) == 1 && any(ismember(handles.ActiveSelectionIdx,idx))
-        [lia,locb] = ismember(handles.ActiveSelectionIdx,idx);
-        value = locb(lia);
-    else
-        value = 1;
-    end
-else
-    listString = 'none';
-    enable = 'off';
-    value = 1;
-end
-
-handles.listbox_selections.Value = value;
-handles.listbox_selections.String = listString;
-handles.listbox_selections.Max = numel(listString);
-handles.listbox_selections.Enable = enable;
-
-handles.ActiveSelectionIdx = getSelectionIndex(handles);
-
-if nargout == 1
-    varargout{1} = handles;
-end
-
-guidata(hObject,handles)
-
-
-function idx = getSelectionIndex(handles)
-
-str   = handles.listbox_selections.String;
-value = handles.listbox_selections.Value;
-if iscell(str)
-    sel = str(value);
-else
-    sel = str;
-end
-
-if any(strcmpi(sel,'none'))
-    idx = 0;
-else
-    idx = str2idx(sel);
-end
-
-function idx = str2idx(str)
-% Convert string entries in listbox to Selection indicies
-
-expression = '^\s*(\d+)\s.*$'; % Extract just the first number
-idx = str2double(regexprep(str,expression,'$1'));
-
-function varargout = updateActiveSelection(hObject,handles)
-
-if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx > 0
-    Lim  = handles.Selections(handles.ActiveSelectionIdx).Lim;
-    
-    handles.dragLine1.Position = Lim(1);
-    handles.dragLine2.Position = Lim(2);
-    
-    dateFormat =  1; % 'dd-mmm-yyyy', ex. 01-Mar-2000
-    timeFormat = 13; % 'HH:MM:SS', ex. 15:45:17
-    
-    sDate = datestr(Lim(1),dateFormat);
-    sTime = datestr(Lim(1),timeFormat);
-    startString = sprintf('%s\n%s',sDate,sTime);
-    
-    eDate = datestr(Lim(2),dateFormat);
-    eTime = datestr(Lim(2),timeFormat);
-    endString = sprintf('%s\n%s',eDate,eTime);
-    
-    enable = 'on';
-    
-    Type = handles.Selections(handles.ActiveSelectionIdx).Type;
-    buttonTag = ['radiobutton_',lower(char(Type(1)))];
-    button = findobj(handles.uibuttongroup_type,'Tag',buttonTag);
-    handles.uibuttongroup_type.SelectedObject = button;
-else
-    startString = '';
-    endString = '';
-    
-    enable = 'off';
-end
-
-handles.text_start.String = startString;
-handles.text_end.String   = endString;
-
-handles.dragLine1.Visible = enable;
-handles.dragLine2.Visible = enable;
-
-if nargout == 1
-    varargout{1} = handles;
-end
-
-guidata(hObject,handles);
-
-
 function StopDragFcn(hObject,eventdata,handles)
 
 if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
@@ -937,23 +681,6 @@ guidata(hObject,handles);
 function closest = Snap(position,handles)
 [~,idx] = min(abs(position - handles.DisplayData.Time));
 closest = handles.DisplayData.Time(idx);
-
-function refocusSelection(hObject,handles)
-
-if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx > 0
-    Lim = handles.Selections(handles.ActiveSelectionIdx).Lim;
-    zoomLevel = getXZoom(handles);
-    if (Lim(2)-Lim(1)) <= zoomLevel
-        value = datenum(Lim(1) + (Lim(2)-Lim(1))/2);
-    else
-        value = datenum(Lim(1));
-    end
-    handles.slider_detailposition.Value = value;
-    % Position detail window
-    handles = reposition_detail_window(handles);
-end
-
-guidata(hObject,handles);
 
 
 % --- Executes when selected object is changed in uibuttongroup_type.
@@ -1070,44 +797,6 @@ function checkbox_none_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_none
-
-
-function revertChanges(hObject, handles)
-
-% Revert Selections to previously saved version
-% Convert data to selections
-handles.Selections = d12pack2selections(handles.SourceData(handles.ActiveDataIdx));
-
-% Set active selection slection index
-if numel(handles.Selections) > 0
-    handles.ActiveSelectionIdx = 1;
-else
-    handles.ActiveSelectionIdx = 0;
-end
-
-% Update list
-handles = updateSelectionList(hObject,handles);
-
-% Update editor
-handles = updateActiveSelection(hObject,handles);
-
-% Construct filter options
-handles = makeFilterOptions(hObject, handles);
-
-% Position detail window
-handles = reposition_detail_window(handles);
-
-% Refocus selection
-refocusSelection(hObject,handles)
-
-% Reset edit counter
-handles.EditCount = 0;
-
-% Validate controls
-handles = validateControls(hObject, handles);
-
-% Update handles structure
-guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
