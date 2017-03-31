@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 31-Mar-2017 15:39:39
+% Last Modified by GUIDE v2.5 31-Mar-2017 17:33:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -670,7 +670,7 @@ if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
     handles.dragLine2.Position = Snap(handles.dragLine2.Position,handles);
     
     Lim = sort([handles.dragLine1.Position,handles.dragLine2.Position]);
-    if Lim ~= handles.Selections(handles.ActiveSelectionIdx).Lim
+    if any(Lim ~= handles.Selections(handles.ActiveSelectionIdx).Lim)
         handles.Selections(handles.ActiveSelectionIdx).Lim = Lim;
         handles = markEdit(hObject,handles);
     end
@@ -724,6 +724,9 @@ handles.EditCount = handles.EditCount + 1;
 % Validate controls
 handles = validateControls(hObject, handles);
 
+% Update selection display
+handles = plotSelections(handles);
+
 guidata(hObject,handles);
 
 
@@ -748,58 +751,58 @@ plot(hObject,[-2,0,2],[2,2,2],'-o','Color',[0.698 0.875 0.541])
 plot(hObject,[-2,0,2],[1,1,1],'-o','Color',[0.992 0.749 0.435])
 
 
-% --- Executes on button press in checkbox_bed.
-function checkbox_bed_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_bed (see GCBO)
+% --- Executes on button press in checkbox_Bed.
+function checkbox_Bed_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Bed (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_bed
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Bed
 
 
-% --- Executes on button press in checkbox_error.
-function checkbox_error_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_error (see GCBO)
+% --- Executes on button press in checkbox_Error.
+function checkbox_Error_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Error (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_error
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Error
 
 
-% --- Executes on button press in checkbox_noncompliance.
-function checkbox_noncompliance_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_noncompliance (see GCBO)
+% --- Executes on button press in checkbox_Noncompliance.
+function checkbox_Noncompliance_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Noncompliance (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_noncompliance
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Noncompliance
 
 
-% --- Executes on button press in checkbox_observation.
-function checkbox_observation_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_observation (see GCBO)
+% --- Executes on button press in checkbox_Observation.
+function checkbox_Observation_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Observation (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_observation
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Observation
 
 
-% --- Executes on button press in checkbox_work.
-function checkbox_work_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_work (see GCBO)
+% --- Executes on button press in checkbox_Work.
+function checkbox_Work_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_Work (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_work
+% Hint: get(hObject,'Value') returns toggle state of checkbox_Work
 
 
-% --- Executes on button press in checkbox_none.
-function checkbox_none_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_none (see GCBO)
+% --- Executes on button press in checkbox_None.
+function checkbox_None_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_None (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_none
+% Hint: get(hObject,'Value') returns toggle state of checkbox_None
 
 
 % --------------------------------------------------------------------
