@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 30-Mar-2017 16:17:54
+% Last Modified by GUIDE v2.5 31-Mar-2017 15:39:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;

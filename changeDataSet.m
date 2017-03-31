@@ -35,8 +35,17 @@ handles = updateActiveSelection(hObject,handles);
 % Construct filter options
 handles = makeFilterOptions(hObject, handles);
 
-% Set title
-handles.text_id.String = sprintf('ID: %s',handles.SourceData(handles.ActiveDataIdx).ID);
+% Set class
+cStr = class(handles.SourceData(handles.ActiveDataIdx));
+handles.text_class.String = sprintf('Class: %s',cStr);
+
+% Set serial number
+sn = handles.SourceData(handles.ActiveDataIdx).SerialNumber;
+handles.text_sn.String = sprintf('Serial Number: %u',sn);
+
+% Set ID
+id = handles.SourceData(handles.ActiveDataIdx).ID;
+handles.text_id.String = sprintf('Identifier: %s',id);
 
 % Adjust slider settings to data
 setSliderLim(handles);
