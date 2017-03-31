@@ -51,10 +51,14 @@ if isNoncompliance && any(idxNoncompliance)
     d12packObj.Compliance = idx;
 end
 
-% Convert obaservation selection (there should only be one)
+% Convert obaservation selection
 if isObservation && any(idxObservation)
     observationSelections = Selections(idxObservation);
-    idx = observationSelections(1).Selection2Index(d12packObj.Time);
+    idx = false(size(d12packObj.Time));
+    for iSel = 1:numel(observationSelections)
+        idxSel = observationSelections(iSel).Selection2Index(d12packObj.Time);
+        idx = idxSel | idx;
+    end
     d12packObj.Observation = idx;
 end
 
