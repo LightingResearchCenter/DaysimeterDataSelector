@@ -23,37 +23,56 @@ idxObservation   = selectionTypes == SelectionType.Observation;
 idxWork          = selectionTypes == SelectionType.Work;
 
 % Convert bed selections
-if isBed && any(idxBed)
-    bedSelections = Selections(idxBed);
-    bedLim = vertcat(bedSelections.Lim);
-    d12packObj.BedLog = d12pack.BedLogData(bedLim(:,1),bedLim(:,2));
+if isBed
+    if any(idxBed)
+        bedSelections = Selections(idxBed);
+        bedLim = vertcat(bedSelections.Lim);
+        d12packObj.BedLog = d12pack.BedLogData(bedLim(:,1),bedLim(:,2));
+    else
+        d12packObj.BedLog = d12pack.BedLogData.empty;
+    end
 end
 
 % Convert error selections
-if isError && any(idxError)
-    errorSelections = Selections(idxError);
-    d12packObj.Error = errorSelections.Selection2Index(d12packObj.Time);
+if isError
+    if any(idxError)
+        errorSelections = Selections(idxError);
+        d12packObj.Error = errorSelections.Selection2Index(d12packObj.Time);
+    else
+        d12packObj.Error = false(size(d12packObj.Time));
+    end
 end
 
 % Convert noncopmliance selections
-if isNoncompliance && any(idxNoncompliance)
-    noncomplianceSelections = Selections(idxNoncompliance);
-    d12packObj.Compliance = ~noncomplianceSelections.Selection2Index(d12packObj.Time);
+if isNoncompliance
+    if any(idxNoncompliance)
+        noncomplianceSelections = Selections(idxNoncompliance);
+        d12packObj.Compliance = ~noncomplianceSelections.Selection2Index(d12packObj.Time);
+    else
+        d12packObj.Compliance = true(size(d12packObj.Time));
+    end
 end
 
 % Convert obaservation selection
-if isObservation && any(idxObservation)
-    observationSelections = Selections(idxObservation);
-    d12packObj.Observation = observationSelections(iSel).Selection2Index(d12packObj.Time);
+if isObservation
+    if any(idxObservation)
+        observationSelections = Selections(idxObservation);
+        d12packObj.Observation = observationSelections.Selection2Index(d12packObj.Time);
+    else
+        d12packObj.Observation = false(size(d12packObj.Time));
+    end
 end
 
 % Convert work selections
-if isWork && any(idxWork)
-    workSelections = Selections(idxWork);
-    workLim = vertcat(workSelections.Lim);
-    d12packObj.WorkLog = d12pack.WorkLogData(workLim(:,1),workLim(:,2));
+if isWork
+    if any(idxWork)
+        workSelections = Selections(idxWork);
+        workLim = vertcat(workSelections.Lim);
+        d12packObj.WorkLog = d12pack.WorkLogData(workLim(:,1),workLim(:,2));
+    else
+        d12packObj.WorkLog = d12pack.WorkLogData.empty;
+    end
 end
-
 
 end
 
