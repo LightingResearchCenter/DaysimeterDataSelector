@@ -29,7 +29,7 @@ if isprop(d12packObj,'Observation') && ~isempty(d12packObj.Observation)
 end
 
 if isprop(d12packObj,'WorkLog') && ~isempty(d12packObj.WorkLog)
-    for iWork = numel(d12packObj.BedLog):-1:1
+    for iWork = numel(d12packObj.WorkLog):-1:1
         Lim = [d12packObj.WorkLog(iWork).StartTime,d12packObj.WorkLog(iWork).EndTime];
         sWork(iWork,1) = Selection(Lim,SelectionType.Work);
     end
