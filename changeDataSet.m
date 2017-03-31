@@ -23,6 +23,9 @@ else
     handles.ActiveSelectionIdx = 0;
 end
 
+% Plot selections
+handles = plotSelections(handles);
+
 % Plot data
 handles = plotData(handles);
 
