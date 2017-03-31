@@ -646,7 +646,8 @@ hObject.YTick = [];
 yyaxis(hObject,'left')
 hObject.YColor = [0.15 0.15 0.15];
 hold(hObject,'on');
-area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[1, 1, 1],'EdgeColor','none','Tag','OverviewHighlight');
+% Todo: change from area to rectangle with dashed line and no fill, move on top of other areas
+area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[0.5, 0.5, 0.5],'EdgeColor','none','Tag','OverviewHighlight');
 
 function setDataVisibility(handles,varName,visState)
 
@@ -759,6 +760,8 @@ function checkbox_Bed_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Bed
 
+handles.checkbox_None.Value = false;
+setDataVisibility(handles,'Bed',hObject.Value)
 
 % --- Executes on button press in checkbox_Error.
 function checkbox_Error_Callback(hObject, eventdata, handles)
@@ -768,6 +771,8 @@ function checkbox_Error_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Error
 
+handles.checkbox_None.Value = false;
+setDataVisibility(handles,'Error',hObject.Value)
 
 % --- Executes on button press in checkbox_Noncompliance.
 function checkbox_Noncompliance_Callback(hObject, eventdata, handles)
@@ -777,6 +782,8 @@ function checkbox_Noncompliance_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Noncompliance
 
+handles.checkbox_None.Value = false;
+setDataVisibility(handles,'Noncompliance',hObject.Value)
 
 % --- Executes on button press in checkbox_Observation.
 function checkbox_Observation_Callback(hObject, eventdata, handles)
@@ -786,6 +793,8 @@ function checkbox_Observation_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Observation
 
+handles.checkbox_None.Value = false;
+setDataVisibility(handles,'Observation',hObject.Value)
 
 % --- Executes on button press in checkbox_Work.
 function checkbox_Work_Callback(hObject, eventdata, handles)
@@ -795,6 +804,8 @@ function checkbox_Work_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_Work
 
+handles.checkbox_None.Value = false;
+setDataVisibility(handles,'Work',hObject.Value)
 
 % --- Executes on button press in checkbox_None.
 function checkbox_None_Callback(hObject, eventdata, handles)
@@ -804,6 +815,17 @@ function checkbox_None_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_None
 
+setDataVisibility(handles, 'Bed',           ~hObject.Value)
+setDataVisibility(handles, 'Error',         ~hObject.Value)
+setDataVisibility(handles, 'Noncompliance', ~hObject.Value)
+setDataVisibility(handles, 'Observation',   ~hObject.Value)
+setDataVisibility(handles, 'Work',          ~hObject.Value)
+
+handles.checkbox_Bed.Value           = ~hObject.Value;
+handles.checkbox_Error.Value         = ~hObject.Value;
+handles.checkbox_Noncompliance.Value = ~hObject.Value;
+handles.checkbox_Observation.Value   = ~hObject.Value;
+handles.checkbox_Work.Value          = ~hObject.Value;
 
 % --------------------------------------------------------------------
 function revertchanges_Callback(hObject, eventdata, handles)
