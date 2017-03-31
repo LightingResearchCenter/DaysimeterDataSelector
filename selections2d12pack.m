@@ -32,34 +32,19 @@ end
 % Convert error selections
 if isError && any(idxError)
     errorSelections = Selections(idxError);
-    idx = false(size(d12packObj.Time));
-    for iSel = 1:numel(errorSelections)
-        idxSel = errorSelections(iSel).Selection2Index(d12packObj.Time);
-        idx = idxSel | idx;
-    end
-    d12packObj.Error = idx;
+    d12packObj.Error = errorSelections.Selection2Index(d12packObj.Time);
 end
 
 % Convert noncopmliance selections
 if isNoncompliance && any(idxNoncompliance)
     noncomplianceSelections = Selections(idxNoncompliance);
-    idx = true(size(d12packObj.Time));
-    for iSel = 1:numel(noncomplianceSelections)
-        idxSel = ~noncomplianceSelections(iSel).Selection2Index(d12packObj.Time);
-        idx = idxSel | idx;
-    end
-    d12packObj.Compliance = idx;
+    d12packObj.Compliance = ~noncomplianceSelections.Selection2Index(d12packObj.Time);
 end
 
 % Convert obaservation selection
 if isObservation && any(idxObservation)
     observationSelections = Selections(idxObservation);
-    idx = false(size(d12packObj.Time));
-    for iSel = 1:numel(observationSelections)
-        idxSel = observationSelections(iSel).Selection2Index(d12packObj.Time);
-        idx = idxSel | idx;
-    end
-    d12packObj.Observation = idx;
+    d12packObj.Observation = observationSelections(iSel).Selection2Index(d12packObj.Time);
 end
 
 % Convert work selections
