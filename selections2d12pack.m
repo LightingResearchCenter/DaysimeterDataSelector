@@ -15,7 +15,7 @@ isObservation   = isprop(d12packObj, 'Observation');
 isWork          = isprop(d12packObj, 'WorkLog');
 
 % Filter selections based on type
-selectionTypes   = vertcat(handles.Selections.Type);
+selectionTypes   = vertcat(Selections.Type);
 idxBed           = selectionTypes == SelectionType.Bed;
 idxError         = selectionTypes == SelectionType.Error;
 idxNoncompliance = selectionTypes == SelectionType.Noncompliance;

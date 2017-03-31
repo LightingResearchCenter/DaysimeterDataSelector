@@ -330,6 +330,7 @@ function pushbutton_savechanges_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+saveChanges(hObject, handles);
 
 % --- Executes on selection change in listbox_selections.
 function listbox_selections_Callback(hObject, eventdata, handles)
@@ -669,8 +670,10 @@ if numel(handles.ActiveSelectionIdx) == 1 && handles.ActiveSelectionIdx >0
     handles.dragLine2.Position = Snap(handles.dragLine2.Position,handles);
     
     Lim = sort([handles.dragLine1.Position,handles.dragLine2.Position]);
-    handles.Selections(handles.ActiveSelectionIdx).Lim = Lim;
-    handles = markEdit(hObject,handles);
+    if Lim ~= handles.Selections(handles.ActiveSelectionIdx).Lim
+        handles.Selections(handles.ActiveSelectionIdx).Lim = Lim;
+        handles = markEdit(hObject,handles);
+    end
 end
 
 handles = updateActiveSelection(hObject,handles);
@@ -818,3 +821,5 @@ function savechanges_Callback(hObject, eventdata, handles)
 % hObject    handle to savechanges (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+saveChanges(hObject, handles);
