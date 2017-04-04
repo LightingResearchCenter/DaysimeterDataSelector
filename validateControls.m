@@ -77,6 +77,20 @@ else
     disable('jump')
 end
 
+%% Identifier Text Field
+if isData
+    enable('edit_id')
+else
+    disable('edit_id')
+end
+
+%% Detail Position Slider
+if isData
+    enable('slider_detailposition')
+else
+    disable('slider_detailposition')
+end
+
 %% Selections Panel
 % Filter
 if isData
@@ -186,39 +200,39 @@ end
 %% Selection Display Panel
 % None
 if isData
-    enable('checkbox_none')
+    enable('checkbox_None')
 else
-    disable('checkbox_none')
+    disable('checkbox_None')
 end
 % Bed
 if isBed
-    enable('checkbox_bed')
+    enable('checkbox_Bed')
 else
-    disable('checkbox_bed')
+    disable('checkbox_Bed')
 end
 % Device Error
 if isError
-    enable('checkbox_error')
+    enable('checkbox_Error')
 else
-    disable('checkbox_error')
+    disable('checkbox_Error')
 end
 % Noncompliance
 if isNoncompliance
-    enable('checkbox_noncompliance')
+    enable('checkbox_Noncompliance')
 else
-    disable('checkbox_noncompliance')
+    disable('checkbox_Noncompliance')
 end
 % Observation
 if isObservation
-    enable('checkbox_observation')
+    enable('checkbox_Observation')
 else
-    disable('checkbox_observation')
+    disable('checkbox_Observation')
 end
 % Work
 if isWork
-    enable('checkbox_work')
+    enable('checkbox_Work')
 else
-    disable('checkbox_work')
+    disable('checkbox_Work')
 end
 
 %% Data Set Panel

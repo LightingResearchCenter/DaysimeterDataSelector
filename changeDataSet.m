@@ -47,8 +47,7 @@ sn = handles.SourceData(handles.ActiveDataIdx).SerialNumber;
 handles.text_sn.String = sprintf('Serial Number: %u',sn);
 
 % Set ID
-id = handles.SourceData(handles.ActiveDataIdx).ID;
-handles.text_id.String = sprintf('Identifier: %s',id);
+handles.edit_id.String = handles.SourceData(handles.ActiveDataIdx).ID;
 
 % Adjust slider settings to data
 setSliderLim(handles);

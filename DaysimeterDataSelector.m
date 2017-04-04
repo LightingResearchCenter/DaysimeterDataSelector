@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 31-Mar-2017 17:33:57
+% Last Modified by GUIDE v2.5 04-Apr-2017 10:42:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,8 +55,11 @@ function DaysimeterDataSelector_OpeningFcn(hObject, eventdata, handles, varargin
 % Choose default command line output for DaysimeterDataSelector
 handles.output = hObject;
 
-% Load data for testing
-addpath('C:\Users\jonesg5\Documents\GitHub\d12pack');
+% Enable dependencies
+if ~isdeployed
+    [GitHubDir,~,~] = fileparts(pwd);
+    addpath(fullfile(GitHubDir,'d12pack'));
+end
 
 % Create SourceData and initialize to empty value
 handles.SourceData = [];
@@ -249,22 +252,43 @@ function open_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-[FileName,PathName] = uigetfile('*.mat','Select the MATLAB data file');
-
-if FileName == 0
-    return
+if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
+    filterSpec = fullfile(handles.LastDir,'*.mat');
+else
+    filterSpec = '*.mat';
 end
 
-s = load(fullfile(PathName,FileName));
-handles.SourceData = findDaysimeterData(s);
-handles.ActiveDataIdx = 0;
-changeDataSet(hObject,handles,1);
+[FileName,PathName] = uigetfile(filterSpec,'Select the MATLAB data file');
+
+if FileName ~= 0
+    handles.SourcePath = fullfile(PathName,FileName);
+    handles.LastDir = PathName;
+    s = load(handles.SourcePath);
+    handles.SourceData = findDaysimeterData(s);
+    handles.ActiveDataIdx = 0;
+    changeDataSet(hObject,handles,1);
+end
 
 % --------------------------------------------------------------------
 function import_Callback(hObject, eventdata, handles)
 % hObject    handle to import (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
+    filterSpec = fullfile(handles.LastDir,'*.cdf');
+else
+    filterSpec = '*.cdf';
+end
+
+[FileName,PathName] = uigetfile(filterSpec,'Select the CDF data file(s)','MultiSelect','on');
+
+if FileName ~= 0
+    handles.SourcePath = '';
+    handles.LastDir = PathName;
+    filePaths = fullfile(PathName, FileName);
+    importData(hObject, handles, filePaths)
+end
 
 
 % --------------------------------------------------------------------
@@ -520,9 +544,9 @@ handles = updateSelectionList(hObject,handles);
 %Update app data
 guidata(hObject,handles);
 
-% --- Executes on button press in pushbutton_pickend.
-function pushbutton_pickend_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_pickend (see GCBO)
+% --- Executes on button press in pushbutton_centerend.
+function pushbutton_centerend_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_centerend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 tz = handles.DisplayData.Time.TimeZone;
@@ -615,6 +639,7 @@ yyaxis(hObject,'left')
 % Format left axis
 hObject.YColor = [0.15 0.15 0.15];
 n = numel(hObject.YTick);
+ylabel(hObject,'Activity Index (AI) & Circadian Stimulus (CS)')
 
 % Format right axis
 yyaxis(hObject,'right')
@@ -624,9 +649,10 @@ hObject.YLim = [0.1, 10^5];
 expoInc = (log10(hObject.YLim(2)) - log10(hObject.YLim(1)))/(n-1);
 expo = log10(hObject.YLim(1)):expoInc:log10(hObject.YLim(2));
 hObject.YTick = 10.^(expo);
-ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
-ylabels(1) = "(0)";
-hObject.YTickLabel = ylabels;
+yTickLabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
+yTickLabels(1) = "(0)";
+hObject.YTickLabel = yTickLabels;
+ylabel(hObject,'Circadian Light (CL_A) & Photopic Illuminance (Lux)')
 
 % --- Executes during object creation, after setting all properties.
 function axes_overview_CreateFcn(hObject, eventdata, handles)
@@ -642,12 +668,6 @@ hObject.YScale = 'log';
 hObject.YColor = [0.15 0.15 0.15];
 hObject.YTick = [];
 
-% Create highlight
-yyaxis(hObject,'left')
-hObject.YColor = [0.15 0.15 0.15];
-hold(hObject,'on');
-% Todo: change from area to rectangle with dashed line and no fill, move on top of other areas
-area(hObject,datetime('now','TimeZone','local')+[0,0,1,1],[0,1,1,0],'FaceColor',[0.5, 0.5, 0.5],'EdgeColor','none','Tag','OverviewHighlight');
 
 function setDataVisibility(handles,varName,visState)
 
@@ -848,3 +868,94 @@ function savechanges_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 saveChanges(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function save_Callback(hObject, eventdata, handles)
+% hObject    handle to save (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if ~isempty(handles.SourcePath)
+    [jObj,handles] = startBusy(handles,'Saving to file...');
+    handles = saveChanges(hObject, handles);
+    objArray = handles.SourceData;
+    save(handles.SourcePath,'objArray');
+    stopBusy(handles,jObj,'File saved.')
+else
+    saveas_Callback(hObject, eventdata, handles)
+end
+
+
+% --------------------------------------------------------------------
+function saveas_Callback(hObject, eventdata, handles)
+% hObject    handle to saveas (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
+    filterSpec = fullfile(handles.LastDir,'*.mat');
+else
+    filterSpec = '*.mat';
+end
+
+[FileName,PathName] = uiputfile(filterSpec,'Save Data with Selections As');
+
+if FileName ~= 0
+    [jObj,handles] = startBusy(handles,'Saving to file...');
+    handles.SourcePath = fullfile(PathName,FileName);
+    handles.LastDir = PathName;
+    handles = saveChanges(hObject, handles);
+    objArray = handles.SourceData;
+    save(handles.SourcePath,'objArray');
+    stopBusy(handles,jObj,'File saved.')
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function axes13_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes13
+
+hold(hObject,'on');
+hObject.Color  = 'none';
+hObject.XColor = 'none';
+hObject.YColor = 'none';
+% Bed
+rectangle(hObject,'Position',[0,8,1,1],'EdgeColor','none','FaceColor',[0.416 0.239 0.604])
+% Device Error
+rectangle(hObject,'Position',[0,6,1,1],'EdgeColor','none','FaceColor',[0.984 0.604 0.600])
+% Noncompliance
+rectangle(hObject,'Position',[0,4,1,1],'EdgeColor','none','FaceColor',[1 1 0.600])
+% Observation
+rectangle(hObject,'Position',[0,2,1,1],'EdgeColor','none','FaceColor',[1 1 1])
+% Work
+rectangle(hObject,'Position',[0,0,1,1],'EdgeColor','none','FaceColor',[0.200 0.628 0.173])
+
+
+
+function edit_id_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_id (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_id as text
+%        str2double(get(hObject,'String')) returns contents of edit_id as a double
+
+markEdit(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_id_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_id (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

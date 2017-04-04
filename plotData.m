@@ -30,9 +30,6 @@ for iVar = 1:numel(varNames)
     handles = detailPlot(handles,varNames{iVar});
 end
 
-% Plot draggable lines
-handles = dragLines(handles);
-
 % Format axes
 yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
 yMaxRight = max([10^5;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
@@ -66,6 +63,25 @@ handles.axes_detail.YTick = 10.^(expo);
 ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
 ylabels(1) = "(0)";
 handles.axes_detail.YTickLabel = ylabels;
+
+% Plot draggable lines
+handles = dragLines(handles);
+
+% Create detail highlight in overview if it doesn't exist
+if ~isfield(handles,'OverviewHighlight') || isempty(handles.OverviewHighlight)
+    % Create highlight
+    yyaxis(handles.axes_overview,'left')
+    handles.axes_overview.YColor = [0.15 0.15 0.15];
+    hold(handles.axes_overview,'on');
+    xHighlight = [handles.axes_detail.XLim(1),handles.axes_detail.XLim(1),handles.axes_detail.XLim(2),handles.axes_detail.XLim(2)];
+    yHighlight = [    0,    1,    1,    0];
+    handles.OverviewHighlight = area(handles.axes_overview, xHighlight, yHighlight, ...
+        'FaceColor', 'none', ...
+        'EdgeColor', [0.8 0.8 0.8], ...
+        'LineWidth', 1.5, ...
+        'LineStyle', ':', ...
+        'Tag', 'OverviewHighlight');
+end
 
 end
 
