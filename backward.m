@@ -21,7 +21,7 @@ else
 end
 
     function previous
-        if handles.ActiveDataIdx < numel(handles.SourceData)
+        if handles.ActiveDataIdx > 1
             TargetDataIdx = handles.ActiveDataIdx - 1;
             changeDataSet(hObject,handles,TargetDataIdx);
         end
