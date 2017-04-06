@@ -15,3 +15,7 @@
 # Simulink Code Generation
 slprj/
 *.mat
+
+
+##---------------------------------------------------
+DaysimeterDataSelector/
