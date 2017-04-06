@@ -276,14 +276,14 @@ function import_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
-    filterSpec = fullfile(handles.LastDir,'*.cdf');
+    DefaultName = handles.LastDir;
 else
-    filterSpec = '*.cdf';
+    DefaultName = '';
 end
+FilterSpec = {'*.txt;*.cdf','raw (*.txt) & CDF-files (*cdf)'};
+[FileName,PathName] = uigetfile(FilterSpec,'Select files to import',DefaultName,'MultiSelect','on');
 
-[FileName,PathName] = uigetfile(filterSpec,'Select the CDF data file(s)','MultiSelect','on');
-
-if FileName ~= 0
+if iscell(FileName) || FileName ~= 0
     handles.SourcePath = '';
     handles.LastDir = PathName;
     filePaths = fullfile(PathName, FileName);
