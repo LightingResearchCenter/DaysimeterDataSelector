@@ -33,6 +33,7 @@ end
 % Format axes
 yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
 yMaxRight = max([10^5;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
+yMaxRight = 10^(round(10*log10(yMaxRight))/10);
 
 % Overview
 yyaxis(handles.axes_overview,'left')
@@ -51,6 +52,7 @@ handles.axes_overview.YLim = [0.1,yMaxRight];
 yyaxis(handles.axes_detail,'left')
 handles.axes_detail.YLimMode = 'manual';
 handles.axes_detail.YLim = [0,yMaxLeft];
+handles.axes_detail.YTick = 0:0.1:yMaxLeft;
 n = numel(handles.axes_detail.YTick);
 
 yyaxis(handles.axes_detail,'right')
