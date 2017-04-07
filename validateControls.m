@@ -76,11 +76,17 @@ if isData && nSourceData > 1
 else
     disable('jump')
 end
-%  --> Add Bed Log...
+%  --> Import Bed Log...
 if isBed
-    enable('addbedlog')
+    enable('importbedlog')
 else
-    disable('addbedlog')
+    disable('importbedlog')
+end
+%  --> Import Work Log...
+if isWork
+    enable('importworklog')
+else
+    disable('importworklog')
 end
 %% Identifier Text Field
 if isData

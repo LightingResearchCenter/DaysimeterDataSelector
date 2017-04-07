@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 07-Apr-2017 10:49:17
+% Last Modified by GUIDE v2.5 07-Apr-2017 13:39:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -969,8 +969,8 @@ end
 
 
 % --------------------------------------------------------------------
-function addbedlog_Callback(hObject, eventdata, handles)
-% hObject    handle to addbedlog (see GCBO)
+function importbedlog_Callback(hObject, eventdata, handles)
+% hObject    handle to importbedlog (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -986,6 +986,30 @@ if FileName ~= 0
     handles.LastDir = PathName;
     bedLogPath = fullfile(PathName, FileName);
     handles.SourceData(handles.ActiveDataIdx).BedLog = handles.SourceData(handles.ActiveDataIdx).BedLog.import(bedLogPath);
+    TargetDataIdx = handles.ActiveDataIdx;
+    handles.ActiveDataIdx = 0;
+    changeDataSet(hObject, handles, TargetDataIdx);
+end
+
+
+% --------------------------------------------------------------------
+function importworklog_Callback(hObject, eventdata, handles)
+% hObject    handle to importworklog (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
+    DefaultName = handles.LastDir;
+else
+    DefaultName = '';
+end
+FilterSpec = {'*.xlsx;*.xls','Excel-file (*.xlsx,*.xls)'};
+[FileName,PathName] = uigetfile(FilterSpec,'Select work log',DefaultName);
+
+if FileName ~= 0
+    handles.LastDir = PathName;
+    workLogPath = fullfile(PathName, FileName);
+    handles.SourceData(handles.ActiveDataIdx).WorkLog = handles.SourceData(handles.ActiveDataIdx).WorkLog.import(workLogPath);
     TargetDataIdx = handles.ActiveDataIdx;
     handles.ActiveDataIdx = 0;
     changeDataSet(hObject, handles, TargetDataIdx);
