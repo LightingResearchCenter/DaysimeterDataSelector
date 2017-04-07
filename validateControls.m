@@ -76,7 +76,12 @@ if isData && nSourceData > 1
 else
     disable('jump')
 end
-
+%  --> Add Bed Log...
+if isBed
+    enable('addbedlog')
+else
+    disable('addbedlog')
+end
 %% Identifier Text Field
 if isData
     enable('edit_id')

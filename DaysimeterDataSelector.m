@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 04-Apr-2017 10:42:27
+% Last Modified by GUIDE v2.5 07-Apr-2017 10:49:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -641,6 +641,9 @@ hObject.YColor = [0.15 0.15 0.15];
 n = numel(hObject.YTick);
 ylabel(hObject,'Activity Index (AI) & Circadian Stimulus (CS)')
 
+% Add listener to YLim
+addlistener(hObject, 'YLim', 'PostSet', @(src,eventdata)detailYLimCallback(eventdata.AffectedObject,eventdata,guidata(eventdata.AffectedObject)));
+
 % Format right axis
 yyaxis(hObject,'right')
 hObject.YScale = 'log';
@@ -667,6 +670,10 @@ yyaxis(hObject,'right')
 hObject.YScale = 'log';
 hObject.YColor = [0.15 0.15 0.15];
 hObject.YTick = [];
+
+
+% Add listener to YLim
+addlistener(hObject, 'YLim', 'PostSet', @(src,eventdata)overviewYLimCallback(eventdata.AffectedObject,eventdata,guidata(eventdata.AffectedObject)));
 
 
 function setDataVisibility(handles,varName,visState)
@@ -958,4 +965,28 @@ function edit_id_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function addbedlog_Callback(hObject, eventdata, handles)
+% hObject    handle to addbedlog (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles,'LastDir') && ~isempty(handles.LastDir)
+    DefaultName = handles.LastDir;
+else
+    DefaultName = '';
+end
+FilterSpec = {'*.xlsx;*.xls','Excel-file (*.xlsx,*.xls)'};
+[FileName,PathName] = uigetfile(FilterSpec,'Select bed log',DefaultName);
+
+if FileName ~= 0
+    handles.LastDir = PathName;
+    bedLogPath = fullfile(PathName, FileName);
+    handles.SourceData(handles.ActiveDataIdx).BedLog = handles.SourceData(handles.ActiveDataIdx).BedLog.import(bedLogPath);
+    TargetDataIdx = handles.ActiveDataIdx;
+    handles.ActiveDataIdx = 0;
+    changeDataSet(hObject, handles, TargetDataIdx);
 end
