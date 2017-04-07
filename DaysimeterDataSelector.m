@@ -297,6 +297,7 @@ function quit_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+delete(handles.figure1)
 
 % --------------------------------------------------------------------
 function autosave_onoff_Callback(hObject, eventdata, handles)
@@ -1023,3 +1024,22 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+if ~isempty(handles.SourceData)
+    qStr = 'Save data to file before exiting?';
+    qTitle = 'Save';
+    button = questdlg(qStr,qTitle,'Yes','No','Yes');
+    
+    if strcmp(button, 'Yes')
+        if ~isempty(handles.SourcePath)
+            handles = saveChanges(hObject, handles);
+            objArray = handles.SourceData;
+            save(handles.SourcePath,'objArray');
+        else
+            saveas_Callback(hObject, eventdata, handles)
+        end
+    end
+    
+else
+    
+end
