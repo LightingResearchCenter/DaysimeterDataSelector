@@ -22,7 +22,7 @@ function varargout = DaysimeterDataSelector(varargin)
 
 % Edit the above text to modify the response to help DaysimeterDataSelector
 
-% Last Modified by GUIDE v2.5 07-Apr-2017 13:39:14
+% Last Modified by GUIDE v2.5 07-Apr-2017 13:45:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -987,6 +987,7 @@ if FileName ~= 0
     bedLogPath = fullfile(PathName, FileName);
     handles.SourceData(handles.ActiveDataIdx).BedLog = handles.SourceData(handles.ActiveDataIdx).BedLog.import(bedLogPath);
     TargetDataIdx = handles.ActiveDataIdx;
+    handles = markEdit(hObject,handles);
     handles.ActiveDataIdx = 0;
     changeDataSet(hObject, handles, TargetDataIdx);
 end
@@ -1011,6 +1012,14 @@ if FileName ~= 0
     workLogPath = fullfile(PathName, FileName);
     handles.SourceData(handles.ActiveDataIdx).WorkLog = handles.SourceData(handles.ActiveDataIdx).WorkLog.import(workLogPath);
     TargetDataIdx = handles.ActiveDataIdx;
+    handles = markEdit(hObject,handles);
     handles.ActiveDataIdx = 0;
     changeDataSet(hObject, handles, TargetDataIdx);
 end
+
+
+% --- Executes during object deletion, before destroying properties.
+function figure1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
