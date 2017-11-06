@@ -6,6 +6,7 @@ classdef Selection
     properties % (Access = public)
         Lim  datetime = NaT(1,2,'TimeZone','local')
         Type SelectionType = SelectionType.Null
+        Meta cell = {''} % Meta data, location for work log
     end
     
     %% Methods public
@@ -40,10 +41,14 @@ classdef Selection
                     
                     addRequired(p,'Lim',isValidLim);
                     addOptional(p,'Type',SelectionType.Noncompliance,isValidType);
+                    addOptional(p,'Meta',{});
                     
                     parse(p,varargin{:});
                     
                     obj.Lim = sort(p.Results.Lim);
+                    if ~isempty(p.Results.Meta)
+                        obj.Meta = p.Results.Meta;
+                    end
                     
                     if ischar(p.Results.Type)
                         expectedTypes = {'Bed','Error','Noncompliance','Observation','Work'};

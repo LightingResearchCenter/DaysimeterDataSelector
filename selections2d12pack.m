@@ -68,7 +68,8 @@ if isWork
     if any(idxWork)
         workSelections = Selections(idxWork);
         workLim = vertcat(workSelections.Lim);
-        d12packObj.WorkLog = d12pack.WorkLogData(workLim(:,1),workLim(:,2));
+        workstations = vertcat(workSelections.Meta);
+        d12packObj.WorkLog = d12pack.WorkLogData(workLim(:,1),workLim(:,2),false,workstations);
     else
         d12packObj.WorkLog = d12pack.WorkLogData.empty;
     end
