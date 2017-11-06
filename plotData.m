@@ -156,6 +156,8 @@ else % else modify it
         'YData', handles.DisplayData.(varName));
 end
 
+% hObj.XData.TimeZone = handles.DisplayData.Time(1).TimeZone;
+
 if handles.(varNameCh).Value
     hObj.Visible = 'on';
 else
