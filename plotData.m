@@ -31,7 +31,11 @@ for iVar = 1:numel(varNames)
 end
 
 % Format axes
-yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
+if any(handles.DisplayData.Error)
+    yMaxLeft = 1;
+else
+    yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
+end
 yMaxRight = max([10^5;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
 yMaxRight = 10^(round(10*log10(yMaxRight))/10);
 

@@ -76,6 +76,34 @@ varNameCh = ['checkbox_',varName];
 ax = handles.axes_detail;
 yyaxis(ax,'left');
 
+% Format axes
+if isfield(handles.DisplayData,'Error') && isfield(handles.DisplayData,'ActivityIndex')
+    if any(handles.DisplayData.Error)
+        yMaxLeft = 1;
+    else
+        yMaxLeft = max([1;handles.DisplayData.ActivityIndex]);
+    end
+    yMaxRight = max([10^5;handles.DisplayData.CircadianLight;handles.DisplayData.Illuminance]);
+    yMaxRight = 10^(round(10*log10(yMaxRight))/10);
+    
+    yyaxis(handles.axes_detail,'left')
+    handles.axes_detail.YLimMode = 'manual';
+    handles.axes_detail.YLim = [0,yMaxLeft];
+    handles.axes_detail.YTick = 0:0.1:yMaxLeft;
+    n = numel(handles.axes_detail.YTick);
+    
+    yyaxis(handles.axes_detail,'right')
+    handles.axes_detail.YLimMode = 'manual';
+    handles.axes_detail.YLim = [0.1,yMaxRight];
+    
+    expoInc = (log10(yMaxRight) - log10(0.1))/(n-1);
+    expo = log10(0.1):expoInc:log10(yMaxRight);
+    handles.axes_detail.YTick = 10.^(expo);
+    ylabels = "10^{" + regexprep(string(num2str(expo')),'\s*','') + "}";
+    ylabels(1) = "(0)";
+    handles.axes_detail.YTickLabel = ylabels;
+end
+
 % Search for object with matching tag
 hObj = findobj(ax,'Tag',varName);
 
